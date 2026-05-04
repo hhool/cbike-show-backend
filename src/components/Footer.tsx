@@ -1,38 +1,53 @@
 import Link from "next/link";
-import { Phone, Mail, MapPin, MessageCircle } from "lucide-react";
+import { Phone, Mail, MapPin } from "lucide-react";
 import type { Locale, Dict } from "@/lib/i18n";
 
 type Props = { locale: Locale; d: Dict };
 
 export default function Footer({ locale, d }: Props) {
+  const isEn = locale === "en";
+
   const navGroups = [
     {
-      title: locale === "en" ? "Industry Cluster" : "产业集群",
+      title: isEn ? "Shop by Category" : "按品类购物",
+      links: [
+        { label: isEn ? "Kids Bikes" : "儿童自行车", href: `/${locale}/products?category=bike` },
+        { label: isEn ? "Balance Bikes" : "平衡车", href: `/${locale}/products?category=balance` },
+        { label: isEn ? "Tricycles" : "三轮童车", href: `/${locale}/products?category=tricycle` },
+        { label: isEn ? "Scooters" : "滑板车", href: `/${locale}/products?category=scooter` },
+        { label: isEn ? "Strollers" : "婴儿推车", href: `/${locale}/products?category=stroller` },
+        { label: isEn ? "High Chairs" : "高脚餐椅", href: `/${locale}/products?category=highchair` },
+      ],
+    },
+    {
+      title: isEn ? "Shop by Age" : "按年龄选购",
+      links: [
+        { label: isEn ? "Infant (0–1 yr)" : "婴儿 0–1岁", href: `/${locale}/products?age=infant` },
+        { label: isEn ? "Toddler (1–3 yr)" : "幼儿 1–3岁", href: `/${locale}/products?age=toddler` },
+        { label: isEn ? "Kids (3–12 yr)" : "儿童 3–12岁", href: `/${locale}/products?age=kids` },
+        { label: isEn ? "All Products" : "全部产品", href: `/${locale}/products` },
+      ],
+    },
+    {
+      title: isEn ? "Industry Cluster" : "产业集群",
       links: [
         { label: d.nav.clusterAbout, href: `/${locale}/cluster/about` },
         { label: d.nav.clusterLocation, href: `/${locale}/cluster/location` },
         { label: d.nav.clusterHonors, href: `/${locale}/cluster/honors` },
+        { label: isEn ? "Manufacturers" : "合作厂家", href: `/${locale}/companies` },
       ],
     },
     {
-      title: locale === "en" ? "Companies & Products" : "企业与产品",
+      title: isEn ? "Contact Us" : "联系我们",
       links: [
-        { label: d.nav.companies, href: `/${locale}/companies` },
-        { label: d.nav.products, href: `/${locale}/products` },
-        { label: locale === "en" ? "Apply to Join" : "企业入驻申请", href: `/${locale}/companies/apply` },
-      ],
-    },
-    {
-      title: locale === "en" ? "Supply Chain & News" : "供应链与资讯",
-      links: [
-        { label: d.nav.supplyChain, href: `/${locale}/supply-chain` },
-        { label: d.nav.news, href: `/${locale}/news` },
         { label: d.nav.contact, href: `/${locale}/contact` },
       ],
     },
   ];
 
-  const socials = locale === "en" ? ["WeChat", "TikTok", "LinkedIn"] : ["微信", "抖音", "领英"];
+  const socials = isEn
+    ? ["Amazon", "TikTok", "Instagram"]
+    : ["亚马逊", "抖音", "小红书"];
 
   return (
     <footer className="bg-gray-900 text-gray-300">
@@ -79,10 +94,9 @@ export default function Footer({ locale, d }: Props) {
 
         <div className="border-t border-gray-800 mt-10 pt-8 grid grid-cols-1 md:grid-cols-2 gap-4">
           <div className="flex flex-wrap gap-4 text-sm text-gray-500">
-            <span className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5" />{locale === "en" ? "Quzhou Industrial Park, Handan, Hebei, China" : "河北省邯郸市曲周县工业园区"}</span>
+            <span className="flex items-center gap-1.5"><MapPin className="w-3.5 h-3.5" />{isEn ? "Quzhou Industrial Park, Handan, Hebei, China" : "河北省邯郸市曲周县工业园区"}</span>
             <span className="flex items-center gap-1.5"><Phone className="w-3.5 h-3.5" />0310-5550000</span>
             <span className="flex items-center gap-1.5"><Mail className="w-3.5 h-3.5" />info@qzcbike.com</span>
-            <span className="flex items-center gap-1.5"><MessageCircle className="w-3.5 h-3.5" />WhatsApp: +86138xxxx</span>
           </div>
           <div className="text-sm text-gray-600 md:text-right">
             {d.footer.copyright} · {d.footer.icp}

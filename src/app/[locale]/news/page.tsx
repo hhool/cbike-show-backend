@@ -4,6 +4,7 @@ import { ArrowRight } from "lucide-react";
 import { articles } from "@/lib/data";
 import { getDictionary } from "@/lib/i18n";
 import type { Locale } from "@/lib/i18n";
+import { l, lArr } from "@/lib/utils";
 
 type Props = { params: Promise<{ locale: Locale }> };
 
@@ -41,16 +42,16 @@ export default async function NewsPage({ params }: Props) {
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           {articles.map((a) => (
             <Link key={a.id} href={`/${locale}/news/${a.slug}`} className="group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md border border-gray-100 transition-shadow">
-              <div className="aspect-[16/9] overflow-hidden">
-                <Image src={a.featuredImg} alt={a.titleEn} width={400} height={225} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" unoptimized />
+              <div className="aspect-video overflow-hidden">
+                <Image src={a.featuredImg} alt={l(a.title, locale)} width={400} height={225} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" unoptimized />
               </div>
               <div className="p-5">
                 <div className="flex gap-2 mb-3 flex-wrap">
-                  <span className="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">{a.categoryLabel}</span>
-                  {a.tags.slice(0, 2).map((t) => (<span key={t} className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">{t}</span>))}
+                  <span className="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">{a.category === "news" ? dn.industry : a.category === "guide" ? dn.guide : dn.interview}</span>
+                  {lArr(a.tags, locale).slice(0, 2).map((t) => (<span key={t} className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">{t}</span>))}
                 </div>
-                <h2 className="font-semibold text-gray-900 line-clamp-2 mb-2">{isEn ? a.titleEn : a.title}</h2>
-                <p className="text-xs text-gray-500 line-clamp-3 mb-3">{isEn ? a.excerptEn : a.excerpt}</p>
+                <h2 className="font-semibold text-gray-900 line-clamp-2 mb-2">{l(a.title, locale)}</h2>
+                <p className="text-xs text-gray-500 line-clamp-3 mb-3">{l(a.excerpt, locale)}</p>
                 <div className="flex items-center justify-between text-xs text-gray-400">
                   <span>{a.publishDate} · {a.author}</span>
                   <span className="text-blue-600 font-medium flex items-center gap-1">{dn.readMore} <ArrowRight className="w-3 h-3" /></span>

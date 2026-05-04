@@ -1,9 +1,10 @@
 import Link from "next/link";
 import Image from "next/image";
 import { ArrowRight, MapPin, Phone, Mail } from "lucide-react";
-import { companies } from "@/lib/data";
+import { companies, categoryLabelsEn } from "@/lib/data";
 import { getDictionary } from "@/lib/i18n";
 import type { Locale } from "@/lib/i18n";
+import { l } from "@/lib/utils";
 
 type Props = { params: Promise<{ locale: Locale }> };
 
@@ -81,19 +82,19 @@ export default async function CompaniesPage({ params }: Props) {
                 <div className="p-5 flex-1">
                   <div className="flex items-start gap-3 mb-3">
                     <div className="w-12 h-12 rounded-lg bg-gray-100 shrink-0 overflow-hidden">
-                      <Image src={co.logo} alt={co.nameEn} width={48} height={48} className="w-full h-full object-cover" unoptimized />
+                      <Image src={co.logo} alt={l(co.name, locale)} width={48} height={48} className="w-full h-full object-cover" unoptimized />
                     </div>
                     <div className="min-w-0">
                       <Link href={`/${locale}/companies/${co.slug}`} className="font-semibold text-gray-900 text-sm hover:text-blue-700 line-clamp-1">
-                        {isEn ? co.nameEn : co.name}
+                        {l(co.name, locale)}
                       </Link>
                       <div className="flex gap-1.5 mt-1 flex-wrap">
-                        <span className="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">{co.categoryLabel}</span>
-                        <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">{co.scaleLabel}</span>
+                        <span className="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">{categoryLabelsEn[co.category]}</span>
+                        <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">{c.scales[co.scale as keyof typeof c.scales]}</span>
                       </div>
                     </div>
                   </div>
-                  <p className="text-xs text-gray-500 line-clamp-3 mb-3">{isEn ? co.introEn : co.intro}</p>
+                  <p className="text-xs text-gray-500 line-clamp-3 mb-3">{l(co.intro, locale)}</p>
                   <div className="space-y-1">
                     <div className="flex items-center gap-1.5 text-xs text-gray-400"><MapPin className="w-3 h-3" />{co.region}</div>
                     <div className="flex items-center gap-1.5 text-xs text-gray-400"><Phone className="w-3 h-3" />{co.phone}</div>

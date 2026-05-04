@@ -80,17 +80,17 @@ export default function CompaniesPage() {
                 <div className="p-5 flex-1">
                   <div className="flex items-start gap-3 mb-3">
                     <div className="w-12 h-12 rounded-lg bg-gray-100 shrink-0 overflow-hidden">
-                      <Image src={c.logo} alt={c.name} width={48} height={48} className="w-full h-full object-cover" unoptimized />
+                      <Image src={c.logo} alt={c.name.zh} width={48} height={48} className="w-full h-full object-cover" unoptimized />
                     </div>
                     <div className="min-w-0">
-                      <Link href={`/companies/${c.slug}`} className="font-semibold text-gray-900 text-sm hover:text-blue-700 line-clamp-1">{c.name}</Link>
+                      <Link href={`/companies/${c.slug}`} className="font-semibold text-gray-900 text-sm hover:text-blue-700 line-clamp-1">{c.name.zh}</Link>
                       <div className="flex gap-1.5 mt-1 flex-wrap">
-                        <span className="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">{c.categoryLabel}</span>
-                        <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">{c.scaleLabel}</span>
+                        <span className="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">{c.category}</span>
+                        <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">{c.scale}</span>
                       </div>
                     </div>
                   </div>
-                  <p className="text-xs text-gray-500 line-clamp-3 mb-3">{c.intro}</p>
+                  <p className="text-xs text-gray-500 line-clamp-3 mb-3">{c.intro.zh}</p>
                   <div className="space-y-1">
                     <div className="flex items-center gap-1.5 text-xs text-gray-400"><MapPin className="w-3 h-3" />{c.region}</div>
                     <div className="flex items-center gap-1.5 text-xs text-gray-400"><Phone className="w-3 h-3" />{c.phone}</div>

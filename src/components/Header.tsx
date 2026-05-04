@@ -2,8 +2,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
-import { Menu, X, Search, Globe, ChevronDown } from "lucide-react";
-import { cn } from "@/lib/utils";
+import { Menu, X, Search, Globe } from "lucide-react";
 import type { Locale, Dict } from "@/lib/i18n";
 
 type Props = { locale: Locale; d: Dict };
@@ -11,26 +10,10 @@ type Props = { locale: Locale; d: Dict };
 export default function Header({ locale, d }: Props) {
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
-  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
 
-  const navItems = [
-    {
-      label: d.nav.cluster,
-      href: `/${locale}/cluster`,
-      children: [
-        { label: d.nav.clusterAbout, href: `/${locale}/cluster/about` },
-        { label: d.nav.clusterLocation, href: `/${locale}/cluster/location` },
-        { label: d.nav.clusterHonors, href: `/${locale}/cluster/honors` },
-      ],
-    },
-    { label: d.nav.companies, href: `/${locale}/companies` },
-    { label: d.nav.products, href: `/${locale}/products` },
-    { label: d.nav.supplyChain, href: `/${locale}/supply-chain` },
-    { label: d.nav.news, href: `/${locale}/news` },
-    { label: d.nav.contact, href: `/${locale}/contact` },
-  ];
+  const isEn = locale === "en";
 
   const otherLocale: Locale = locale === "zh" ? "en" : "zh";
   const switchHref = pathname.replace(`/${locale}`, `/${otherLocale}`);
@@ -49,46 +32,11 @@ export default function Header({ locale, d }: Props) {
             </div>
           </Link>
 
-          {/* Desktop Nav */}
-          <nav className="hidden lg:flex items-center gap-1">
-            {navItems.map((item) => (
-              <div key={item.href} className="relative group">
-                <Link
-                  href={item.href}
-                  className="flex items-center gap-0.5 px-3 py-2 text-sm text-gray-700 rounded-md hover:bg-blue-50 hover:text-blue-700 transition-colors"
-                  onMouseEnter={() => item.children && setOpenDropdown(item.href)}
-                  onMouseLeave={() => setOpenDropdown(null)}
-                >
-                  {item.label}
-                  {item.children && <ChevronDown className="w-3 h-3 opacity-60" />}
-                </Link>
-                {item.children && (
-                  <div
-                    className={cn(
-                      "absolute top-full left-0 mt-1 w-40 bg-white rounded-lg shadow-lg border border-gray-100 py-1 transition-all",
-                      openDropdown === item.href ? "opacity-100 visible" : "opacity-0 invisible"
-                    )}
-                    onMouseEnter={() => setOpenDropdown(item.href)}
-                    onMouseLeave={() => setOpenDropdown(null)}
-                  >
-                    {item.children.map((child) => (
-                      <Link
-                        key={child.href}
-                        href={child.href}
-                        className="block px-4 py-2 text-sm text-gray-600 hover:bg-blue-50 hover:text-blue-700"
-                      >
-                        {child.label}
-                      </Link>
-                    ))}
-                  </div>
-                )}
-              </div>
-            ))}
-          </nav>
+
 
           {/* Right Actions */}
           <div className="flex items-center gap-2">
-            <div className={cn("hidden sm:flex items-center", searchOpen ? "w-48" : "w-8")}>
+            <div className={`hidden sm:flex items-center ${searchOpen ? "w-48" : "w-8"}`}>
               {searchOpen ? (
                 <form
                   onSubmit={(e) => {
@@ -128,10 +76,10 @@ export default function Header({ locale, d }: Props) {
             </Link>
 
             <Link
-              href={`/${locale}/contact`}
-              className="hidden sm:block bg-blue-700 text-white text-sm px-4 py-1.5 rounded-full hover:bg-blue-800 transition-colors"
+              href={`/${locale}/products`}
+              className="hidden sm:block bg-orange-500 text-white text-sm px-4 py-1.5 rounded-full hover:bg-orange-400 transition-colors font-semibold"
             >
-              {d.inquiryCta}
+              {d.shopCta}
             </Link>
 
             <button
@@ -146,34 +94,13 @@ export default function Header({ locale, d }: Props) {
 
       {menuOpen && (
         <div className="lg:hidden border-t border-gray-100 bg-white px-4 pb-4">
-          {navItems.map((item) => (
-            <div key={item.href}>
-              <Link
-                href={item.href}
-                className="block py-2.5 text-sm text-gray-700 border-b border-gray-50"
-                onClick={() => setMenuOpen(false)}
-              >
-                {item.label}
-              </Link>
-              {item.children?.map((child) => (
-                <Link
-                  key={child.href}
-                  href={child.href}
-                  className="block py-2 pl-4 text-sm text-gray-500"
-                  onClick={() => setMenuOpen(false)}
-                >
-                  {child.label}
-                </Link>
-              ))}
-            </div>
-          ))}
           <div className="mt-3 flex gap-2">
             <Link
-              href={`/${locale}/contact`}
-              className="flex-1 text-center bg-blue-700 text-white text-sm px-4 py-2 rounded-full"
+              href={`/${locale}/products`}
+              className="flex-1 text-center bg-orange-500 text-white text-sm px-4 py-2 rounded-full"
               onClick={() => setMenuOpen(false)}
             >
-              {d.inquiryCta}
+              {d.shopCta}
             </Link>
             <Link
               href={switchHref}

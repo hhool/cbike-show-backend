@@ -11,7 +11,7 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
   const company = companies.find((c) => c.slug === slug);
-  return { title: company ? `${company.name} | 曲周童车产业带` : "企业详情" };
+  return { title: company ? `${company.name.zh} | 曲周童车产业带` : "企业详情" };
 }
 
 export default async function CompanyDetailPage({ params }: { params: Promise<{ slug: string }> }) {
@@ -35,19 +35,19 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6">
               <div className="flex items-start gap-4">
                 <div className="w-20 h-20 rounded-xl bg-gray-100 overflow-hidden shrink-0">
-                  <Image src={company.logo} alt={company.name} width={80} height={80} className="w-full h-full object-cover" unoptimized />
+                  <Image src={company.logo} alt={company.name.zh} width={80} height={80} className="w-full h-full object-cover" unoptimized />
                 </div>
                 <div>
-                  <h1 className="text-xl font-bold text-gray-900">{company.name}</h1>
-                  <p className="text-sm text-gray-500 mt-0.5">{company.nameEn}</p>
+                  <h1 className="text-xl font-bold text-gray-900">{company.name.zh}</h1>
+                  <p className="text-sm text-gray-500 mt-0.5">{company.name.en}</p>
                   <div className="flex flex-wrap gap-2 mt-2">
-                    <span className="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">{company.categoryLabel}</span>
-                    <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">{company.scaleLabel}</span>
+                    <span className="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">{company.category}</span>
+                    <span className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">{company.scale}</span>
                     {company.exportFlag && <span className="text-xs bg-green-50 text-green-600 px-2 py-0.5 rounded-full">✓ 出口企业</span>}
                   </div>
                 </div>
               </div>
-              <p className="text-sm text-gray-600 mt-4 leading-relaxed">{company.intro}</p>
+              <p className="text-sm text-gray-600 mt-4 leading-relaxed">{company.intro.zh}</p>
               <dl className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-4 text-sm">
                 <div className="bg-gray-50 rounded-lg p-3">
                   <dt className="text-xs text-gray-400">成立年份</dt>
@@ -59,7 +59,7 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
                 </div>
                 <div className="bg-gray-50 rounded-lg p-3">
                   <dt className="text-xs text-gray-400">企业规模</dt>
-                  <dd className="font-semibold text-gray-800">{company.scaleLabel}</dd>
+                  <dd className="font-semibold text-gray-800">{company.scale}</dd>
                 </div>
               </dl>
             </div>
@@ -71,7 +71,7 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
                 <div className="grid grid-cols-3 gap-2">
                   {company.gallery.map((img, i) => (
                     <div key={i} className="aspect-[4/3] rounded-lg overflow-hidden bg-gray-100">
-                      <Image src={img} alt={`${company.name} 图片${i + 1}`} width={300} height={225} className="w-full h-full object-cover" unoptimized />
+                      <Image src={img} alt={`${company.name.zh} 图片${i + 1}`} width={300} height={225} className="w-full h-full object-cover" unoptimized />
                     </div>
                   ))}
                 </div>
@@ -86,10 +86,10 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
                   {companyProducts.map((p) => (
                     <Link key={p.id} href={`/products/${p.slug}`} className="group rounded-xl overflow-hidden border border-gray-100 hover:shadow-md transition-shadow">
                       <div className="aspect-[4/3] overflow-hidden bg-gray-50">
-                        <Image src={p.images[0]} alt={p.name} width={200} height={150} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" unoptimized />
+                        <Image src={p.images[0]} alt={p.name.zh} width={200} height={150} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" unoptimized />
                       </div>
                       <div className="p-3">
-                        <div className="text-xs font-medium text-gray-800 line-clamp-2">{p.name}</div>
+                        <div className="text-xs font-medium text-gray-800 line-clamp-2">{p.name.zh}</div>
                         <div className="text-xs text-blue-700 font-semibold mt-1">{p.priceRange}</div>
                       </div>
                     </Link>
@@ -144,7 +144,7 @@ export default async function CompanyDetailPage({ params }: { params: Promise<{ 
                   allowFullScreen
                   loading="lazy"
                   referrerPolicy="no-referrer-when-downgrade"
-                  title={`${company.name}位置`}
+                  title={`${company.name.zh}位置`}
                 />
               </div>
             </div>

@@ -71,12 +71,12 @@ export default function Home() {
             {companies.slice(0, 6).map((c) => (
               <Link key={c.id} href={`/companies/${c.slug}`} className="bg-white rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow border border-gray-100 flex gap-4 items-start">
                 <div className="w-14 h-14 rounded-lg bg-gray-100 flex items-center justify-center text-xs text-gray-400 font-medium shrink-0 overflow-hidden">
-                  <Image src={c.logo} alt={c.name} width={56} height={56} className="object-cover" unoptimized />
+                  <Image src={c.logo} alt={c.name.zh} width={56} height={56} className="object-cover" unoptimized />
                 </div>
                 <div className="min-w-0">
-                  <div className="font-semibold text-gray-900 text-sm truncate">{c.name}</div>
-                  <div className="text-xs text-gray-400 mt-0.5">{c.region} · {c.categoryLabel}</div>
-                  <p className="text-xs text-gray-500 mt-1.5 line-clamp-2">{c.intro.slice(0, 60)}…</p>
+                  <div className="font-semibold text-gray-900 text-sm truncate">{c.name.zh}</div>
+                  <div className="text-xs text-gray-400 mt-0.5">{c.region} · {c.category}</div>
+                  <p className="text-xs text-gray-500 mt-1.5 line-clamp-2">{c.intro.zh.slice(0, 60)}…</p>
                 </div>
               </Link>
             ))}
@@ -96,12 +96,12 @@ export default function Home() {
             return (
               <Link key={p.id} href={`/products/${p.slug}`} className="group bg-white rounded-2xl overflow-hidden shadow-sm hover:shadow-md border border-gray-100 transition-shadow">
                 <div className="aspect-[4/3] overflow-hidden">
-                  <Image src={p.images[0]} alt={p.name} width={400} height={300} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" unoptimized />
+                  <Image src={p.images[0]} alt={p.name.zh} width={400} height={300} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" unoptimized />
                 </div>
                 <div className="p-4">
-                  <div className="text-xs text-blue-600 font-medium mb-1">{p.categoryLabel}</div>
-                  <div className="font-semibold text-sm text-gray-900 line-clamp-2">{p.name}</div>
-                  <div className="text-xs text-gray-400 mt-1">{company?.name}</div>
+                  <div className="text-xs text-blue-600 font-medium mb-1">{p.category}</div>
+                  <div className="font-semibold text-sm text-gray-900 line-clamp-2">{p.name.zh}</div>
+                  <div className="text-xs text-gray-400 mt-1">{company?.name.zh}</div>
                   <div className="flex items-center justify-between mt-3">
                     <span className="text-sm font-bold text-blue-700">{p.priceRange}</span>
                     <span className="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">询盘</span>
@@ -144,15 +144,15 @@ export default function Home() {
           {latestArticles.map((a) => (
             <Link key={a.id} href={`/news/${a.slug}`} className="group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md border border-gray-100 transition-shadow">
               <div className="aspect-[16/9] overflow-hidden">
-                <Image src={a.featuredImg} alt={a.title} width={400} height={225} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" unoptimized />
+                <Image src={a.featuredImg} alt={a.title.zh} width={400} height={225} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" unoptimized />
               </div>
               <div className="p-4">
                 <div className="flex gap-2 mb-2 flex-wrap">
-                  <span className="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">{a.categoryLabel}</span>
-                  {a.tags.slice(0, 2).map((t) => (<span key={t} className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">{t}</span>))}
+                  <span className="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">{a.category}</span>
+                  {a.tags.slice(0, 2).map((t) => (<span key={t.zh} className="text-xs bg-gray-100 text-gray-500 px-2 py-0.5 rounded-full">{t.zh}</span>))}
                 </div>
-                <h3 className="font-semibold text-sm text-gray-900 line-clamp-2 mb-2">{a.title}</h3>
-                <p className="text-xs text-gray-500 line-clamp-2">{a.excerpt}</p>
+                <h3 className="font-semibold text-sm text-gray-900 line-clamp-2 mb-2">{a.title.zh}</h3>
+                <p className="text-xs text-gray-500 line-clamp-2">{a.excerpt.zh}</p>
                 <div className="text-xs text-gray-400 mt-3">{a.publishDate} · {a.author}</div>
               </div>
             </Link>

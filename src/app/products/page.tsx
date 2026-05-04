@@ -51,12 +51,12 @@ export default function ProductsPage() {
               return (
                 <Link key={p.id} href={`/products/${p.slug}`} className="group bg-white rounded-xl overflow-hidden shadow-sm hover:shadow-md border border-gray-100 transition-shadow">
                   <div className="aspect-[4/3] overflow-hidden bg-gray-50">
-                    <Image src={p.images[0]} alt={p.name} width={300} height={225} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" unoptimized />
+                    <Image src={p.images[0]} alt={p.name.zh} width={300} height={225} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300" unoptimized />
                   </div>
                   <div className="p-3">
-                    <div className="text-xs text-blue-600 font-medium mb-1">{p.categoryLabel}</div>
-                    <div className="text-sm font-semibold text-gray-900 line-clamp-2">{p.name}</div>
-                    <div className="text-xs text-gray-400 mt-1 truncate">{company?.name}</div>
+                    <div className="text-xs text-blue-600 font-medium mb-1">{p.category}</div>
+                    <div className="text-sm font-semibold text-gray-900 line-clamp-2">{p.name.zh}</div>
+                    <div className="text-xs text-gray-400 mt-1 truncate">{company?.name.zh}</div>
                     <div className="flex items-center justify-between mt-2">
                       <span className="text-sm font-bold text-blue-700">{p.priceRange}</span>
                       <span className="text-xs bg-blue-50 text-blue-600 px-2 py-0.5 rounded-full">询盘</span>
