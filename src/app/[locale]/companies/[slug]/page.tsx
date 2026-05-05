@@ -6,6 +6,7 @@ import { companies, products, categoryLabelsEn } from "@/lib/data";
 import { getDictionary } from "@/lib/i18n";
 import type { Locale } from "@/lib/i18n";
 import { l } from "@/lib/utils";
+import { InquiryButton } from "@/components/InquiryButton";
 
 export async function generateStaticParams() {
   return companies.flatMap((c) => [
@@ -102,6 +103,21 @@ export default async function CompanyDetailPage({ params }: Props) {
           </div>
 
           <aside className="w-full lg:w-72 shrink-0 space-y-4">
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+              <h2 className="text-sm font-semibold text-gray-900 mb-3">
+                {isEn ? "Send Inquiry" : "发送询盘"}
+              </h2>
+              <p className="text-xs text-gray-500 mb-3">
+                {isEn
+                  ? "Contact this company directly for product pricing and cooperation."
+                  : "直接联系该企业，了解产品报价与合作方式。"}
+              </p>
+              <InquiryButton
+                targetName={l(company.name, locale)}
+                locale={locale}
+                isEn={isEn}
+              />
+            </div>
             <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
               <h2 className="text-sm font-semibold text-gray-900 mb-4">{dc.contact}</h2>
               <div className="space-y-3">

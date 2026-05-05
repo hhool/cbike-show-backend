@@ -6,6 +6,7 @@ import { products, companies } from "@/lib/data";
 import { getDictionary } from "@/lib/i18n";
 import type { Locale } from "@/lib/i18n";
 import { l } from "@/lib/utils";
+import { InquiryButton } from "@/components/InquiryButton";
 
 export async function generateStaticParams() {
   return products.flatMap((p) => [
@@ -145,6 +146,21 @@ export default async function ProductDetailPage({ params }: Props) {
 
           {/* Sidebar */}
           <aside className="w-full lg:w-64 shrink-0 space-y-4">
+            {/* Inquiry */}
+            <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
+              <p className="text-sm font-semibold text-gray-900 mb-1">
+                {isEn ? "Interested in this product?" : "对此产品感兴趣？"}
+              </p>
+              <p className="text-xs text-gray-500 mb-3">
+                {isEn ? "Contact the supplier for pricing, MOQ and lead time." : "联系供应商获取报价、起订量及交货期。"}
+              </p>
+              <InquiryButton
+                targetName={l(product.name, locale)}
+                locale={locale}
+                isEn={isEn}
+              />
+            </div>
+
             {/* Manufacturer */}
             {company && (
               <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-5">
