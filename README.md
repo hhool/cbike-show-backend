@@ -1,36 +1,30 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# site_cbike_show — 童车评测实验室(Payload + Next.js)
 
-## Getting Started
-
-First, run the development server:
+## 启动
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+cd cbike_show/site_cbike_show
+cp .env.local.example .env.local
+# 编辑 .env.local,至少修改 PAYLOAD_SECRET
+
+npm install
+npx payload generate:importmap   # 生成 src/app/(payload)/admin/importMap.js
+npm run dev                       # http://localhost:3000
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+首次访问 [http://localhost:3000/admin](http://localhost:3000/admin) 会引导创建第一个超级管理员账号。
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+## 目录速览
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+- `payload.config.ts` — Payload 配置(7 个 collection)
+- `src/payload/collections/` — Users / Members / Media / Brands / Categories / Products / Reviews
+- `src/app/(payload)/` — Payload Admin + REST API 路由
+- `src/app/page.tsx` — 临时前台首页占位
 
-## Learn More
+## 设计文档
 
-To learn more about Next.js, take a look at the following resources:
-
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
-
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
-
-## Deploy on Vercel
-
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+- 需求:`../env/PRD-V1.0.md`
+- 信息架构:`../env/Site-IA-V1.0.md`
+- 后台 CMS:`../env/Admin-CMS-V1.0.md`
+- 技术架构:`../env/Tech-Architecture-V1.0.md`
+- 静态原型:`../prototype/`

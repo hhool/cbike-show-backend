@@ -1,11 +1,16 @@
 import type { NextConfig } from "next";
+import { withPayload } from "@payloadcms/next/withPayload";
 
 const nextConfig: NextConfig = {
-  typescript: {
-    // Next.js 16 infers locale params as `string`; our Locale union is a subset.
-    // Runtime is correct — this is a framework-level constraint mismatch.
-    ignoreBuildErrors: true,
+  typescript: { ignoreBuildErrors: true },
+  images: {
+    remotePatterns: [
+      { protocol: "http", hostname: "localhost" },
+      { protocol: "https", hostname: "images.unsplash.com" },
+      { protocol: "https", hostname: "**.amazonaws.com" }
+    ]
   },
+  webpack: (config) => config
 };
 
-export default nextConfig;
+export default withPayload(nextConfig);
