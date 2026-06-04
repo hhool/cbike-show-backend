@@ -28,3 +28,7 @@ npm run dev                       # http://localhost:3000
 - 后台 CMS:`../env/Admin-CMS-V1.0.md`
 - 技术架构:`../env/Tech-Architecture-V1.0.md`
 - 静态原型:`../prototype/`
+- 部署执行版:`../env/process/DeploymentRunbook_Production_V2_zh.md`
+- 生产人工验收:`../env/process/ProductionAcceptanceChecklist_V1_zh.md`
+- 后台逐页验收模板:`../env/process/AdminPageAcceptanceTemplate_V1_zh.md`
+- 最终交付摘要:`../env/process/DeliverySummary_V1_zh.md`
