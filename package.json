@@ -8,6 +8,8 @@
     "build": "rm -rf .next && next build",
     "start": "next start",
     "lint": "eslint",
+    "neon:init-local": "./scripts/neon-init-local.sh",
+    "render:init": "./scripts/render-init.sh",
     "db:migrate": "node --import tsx ./node_modules/payload/dist/bin/index.js migrate",
     "db:migrate:create": "node --import tsx ./node_modules/payload/dist/bin/index.js migrate:create",
     "db:migrate:status": "node --import tsx ./node_modules/payload/dist/bin/index.js migrate:status",
