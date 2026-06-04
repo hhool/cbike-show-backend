@@ -9,20 +9,32 @@ import sharp from "sharp";
 import path from "path";
 import { fileURLToPath } from "url";
 
-import { Users } from "./src/payload/collections/Users";
-import { Members } from "./src/payload/collections/Members";
-import { Media } from "./src/payload/collections/Media";
-import { Brands } from "./src/payload/collections/Brands";
-import { Categories } from "./src/payload/collections/Categories";
-import { Products } from "./src/payload/collections/Products";
-import { Reviews } from "./src/payload/collections/Reviews";
-import { SitePages } from "./src/payload/collections/SitePages";
-import { LocaleEntries } from "./src/payload/collections/LocaleEntries";
+import { Users } from "./src/payload/collections/Users.ts";
+import { Members } from "./src/payload/collections/Members.ts";
+import { Media } from "./src/payload/collections/Media.ts";
+import { Brands } from "./src/payload/collections/Brands.ts";
+import { Categories } from "./src/payload/collections/Categories.ts";
+import { Products } from "./src/payload/collections/Products.ts";
+import { Reviews } from "./src/payload/collections/Reviews.ts";
+import { SitePages } from "./src/payload/collections/SitePages.ts";
+import { LocaleEntries } from "./src/payload/collections/LocaleEntries.ts";
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
+const isProduction = process.env.NODE_ENV === "production";
+const isRender = process.env.RENDER === "true";
+const rawDatabaseURL = process.env.DATABASE_URL;
+
+// On Render production, fail fast if DATABASE_URL is missing or accidentally points to local SQLite.
+if (isProduction && isRender && !rawDatabaseURL) {
+  throw new Error("DATABASE_URL is required in production. Set a Postgres URL (Neon recommended).");
+}
+
 const databaseURL = process.env.DATABASE_URL ?? `file:${path.resolve(dirname, "payload.db")}`;
-const isPostgres = !databaseURL.startsWith("file:");
+if (isProduction && isRender && databaseURL.startsWith("file:")) {
+  throw new Error("Invalid production database configuration: SQLite fallback is disabled in production.");
+}
+
 const hasSmtp = Boolean(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
 const localOrigins = [
   "http://127.0.0.1:3000",

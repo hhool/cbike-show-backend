@@ -8,6 +8,10 @@
     "build": "rm -rf .next && next build",
     "start": "next start",
     "lint": "eslint",
+    "db:migrate": "node --import tsx ./node_modules/payload/dist/bin/index.js migrate",
+    "db:migrate:create": "node --import tsx ./node_modules/payload/dist/bin/index.js migrate:create",
+    "db:migrate:status": "node --import tsx ./node_modules/payload/dist/bin/index.js migrate:status",
+    "db:migrate:fresh": "node --import tsx ./node_modules/payload/dist/bin/index.js migrate:fresh --forceAcceptWarning",
     "payload:types": "payload generate:types",
     "payload:importmap": "payload generate:importmap"
   },
