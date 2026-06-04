@@ -16,6 +16,8 @@ import { Brands } from "./src/payload/collections/Brands";
 import { Categories } from "./src/payload/collections/Categories";
 import { Products } from "./src/payload/collections/Products";
 import { Reviews } from "./src/payload/collections/Reviews";
+import { SitePages } from "./src/payload/collections/SitePages";
+import { LocaleEntries } from "./src/payload/collections/LocaleEntries";
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -64,7 +66,7 @@ export default buildConfig({
   csrf: localOrigins,
   editor: lexicalEditor({}),
   db: dbAdapter,
-  collections: [Users, Members, Media, Brands, Categories, Products, Reviews],
+  collections: [Users, Members, Media, Brands, Categories, Products, Reviews, SitePages, LocaleEntries],
   typescript: { outputFile: path.resolve(dirname, "payload-types.ts") },
   upload: { limits: { fileSize: 10 * 1024 * 1024 } }
 });
