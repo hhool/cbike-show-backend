@@ -45,6 +45,31 @@ const localOrigins = [
   "http://localhost:8083"
 ];
 
+const parseOriginList = (rawValue?: string) =>
+  (rawValue ?? "")
+    .split(",")
+    .map((value) => value.trim())
+    .filter(Boolean);
+
+const toOrigin = (value: string) => {
+  try {
+    return new URL(value).origin;
+  } catch {
+    return null;
+  }
+};
+
+const configuredOrigins = [
+  process.env.NEXTAUTH_URL,
+  process.env.NEXT_PUBLIC_SITE_URL,
+  process.env.PROTOTYPE_SITE_URL ?? "https://cbike-show-front.vercel.app",
+  ...parseOriginList(process.env.CORS_ORIGINS)
+]
+  .map((value) => (value ? toOrigin(value) : null))
+  .filter((value): value is string => Boolean(value));
+
+const allowedOrigins = Array.from(new Set([...localOrigins, ...configuredOrigins]));
+
 const dbAdapter = databaseURL.startsWith("file:")
   ? sqliteAdapter({ client: { url: databaseURL } })
   : postgresAdapter({ pool: { connectionString: databaseURL } });
@@ -74,8 +99,8 @@ export default buildConfig({
     meta: { titleSuffix: " — 童车评测实验室" },
     importMap: { autoGenerate: false }
   },
-  cors: localOrigins,
-  csrf: localOrigins,
+  cors: allowedOrigins,
+  csrf: allowedOrigins,
   editor: lexicalEditor({}),
   db: dbAdapter,
   collections: [Users, Members, Media, Brands, Categories, Products, Reviews, SitePages, LocaleEntries],

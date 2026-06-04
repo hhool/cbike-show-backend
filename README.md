@@ -80,6 +80,8 @@ Key variables:
 - `RENDER=true` on Render
 - `NEXT_PUBLIC_SITE_URL`
 - `NEXT_PUBLIC_API_BASE_URL`
+- `PROTOTYPE_SITE_URL` for the static Vercel frontend origin
+- `CORS_ORIGINS` for any additional allowed frontend origins (comma-separated)
 - SMTP variables (optional)
 
 Production database notes:

@@ -32,3 +32,8 @@ npm run dev                       # http://localhost:3000
 - 生产人工验收:`../env/process/ProductionAcceptanceChecklist_V1_zh.md`
 - 后台逐页验收模板:`../env/process/AdminPageAcceptanceTemplate_V1_zh.md`
 - 最终交付摘要:`../env/process/DeliverySummary_V1_zh.md`
+
+## 生产环境补充变量
+
+- `PROTOTYPE_SITE_URL`：静态 Vercel 前端域名，默认线上原型为 `https://cbike-show-front.vercel.app`
+- `CORS_ORIGINS`：附加允许访问后端 API 的前端来源，多个域名用逗号分隔
