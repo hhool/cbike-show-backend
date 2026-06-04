@@ -71,13 +71,22 @@ If not provided, defaults from `scripts/seed.ts` are used.
 ## Environment Variables
 
 See `.env.local.example` for the baseline template.
+See `.env.production.example` for the production/Render template.
 
 Key variables:
 
 - `PAYLOAD_SECRET`
 - `DATABASE_URL`
+- `RENDER=true` on Render
 - `NEXT_PUBLIC_SITE_URL`
+- `NEXT_PUBLIC_API_BASE_URL`
 - SMTP variables (optional)
+
+Production database notes:
+
+- Neon URLs may use either `postgres://` or `postgresql://`
+- Production deployment should not fall back to local SQLite
+- Current live deployment uses Render + Neon unified topology
 
 ## Key Routes
 
@@ -110,7 +119,27 @@ Free-tier delivery artifacts in this repo:
 - `render.yaml`
 - `.env.production.example`
 - `scripts/smoke-deploy.sh`
+- `scripts/render-init.sh`
+- `scripts/neon-init-local.sh`
+
+Useful recovery/init commands:
+
+```bash
+# Run inside Render Shell
+npm run render:init
+
+# Run from local terminal against Neon after exporting DATABASE_URL
+npm run neon:init-local
+
+# Seed through a running app instance
+API_BASE=http://localhost:3000 npx tsx scripts/seed.ts
+```
 
 Deployment checklists are available in:
 - `../env/process/DeploymentChecklist_V1_zh.md`
 - `../env/process/DeploymentChecklist_V1_en.md`
+
+Manual acceptance checklist:
+- `../env/process/ProductionAcceptanceChecklist_V1_zh.md`
+- `../env/process/ProductionAcceptanceChecklist_V1_en.md`
+
