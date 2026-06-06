@@ -3,21 +3,22 @@ import { sqliteAdapter } from "@payloadcms/db-sqlite";
 import { postgresAdapter } from "@payloadcms/db-postgres";
 import { nodemailerAdapter } from "@payloadcms/email-nodemailer";
 import { lexicalEditor } from "@payloadcms/richtext-lexical";
+import { s3Storage } from "@payloadcms/storage-s3";
 import { en } from "@payloadcms/translations/languages/en";
 import { zh } from "@payloadcms/translations/languages/zh";
 import sharp from "sharp";
 import path from "path";
 import { fileURLToPath } from "url";
 
-import { Users } from "./src/payload/collections/Users.js";
-import { Members } from "./src/payload/collections/Members.js";
-import { Media } from "./src/payload/collections/Media.js";
-import { Brands } from "./src/payload/collections/Brands.js";
-import { Categories } from "./src/payload/collections/Categories.js";
-import { Products } from "./src/payload/collections/Products.js";
-import { Reviews } from "./src/payload/collections/Reviews.js";
-import { SitePages } from "./src/payload/collections/SitePages.js";
-import { LocaleEntries } from "./src/payload/collections/LocaleEntries.js";
+import { Users } from "./src/payload/collections/Users";
+import { Members } from "./src/payload/collections/Members";
+import { Media } from "./src/payload/collections/Media";
+import { Brands } from "./src/payload/collections/Brands";
+import { Categories } from "./src/payload/collections/Categories";
+import { Products } from "./src/payload/collections/Products";
+import { Reviews } from "./src/payload/collections/Reviews";
+import { SitePages } from "./src/payload/collections/SitePages";
+import { LocaleEntries } from "./src/payload/collections/LocaleEntries";
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
@@ -41,6 +42,12 @@ if (isProduction && (isVercel || isRender) && databaseURL.startsWith("file:")) {
 }
 
 const hasSmtp = Boolean(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
+const hasR2Storage = Boolean(
+  process.env.R2_BUCKET_NAME &&
+    process.env.R2_ENDPOINT &&
+    process.env.R2_ACCESS_KEY_ID &&
+    process.env.R2_SECRET_ACCESS_KEY
+);
 const localOrigins = [
   "http://127.0.0.1:3000",
   "http://localhost:3000",
@@ -79,6 +86,24 @@ const dbAdapter = databaseURL.startsWith("file:")
   ? sqliteAdapter({ client: { url: databaseURL } })
   : postgresAdapter({ pool: { connectionString: databaseURL } });
 
+const storagePlugins = hasR2Storage
+  ? [
+      s3Storage({
+        collections: { media: true },
+        bucket: process.env.R2_BUCKET_NAME!,
+        config: {
+          endpoint: process.env.R2_ENDPOINT,
+          region: process.env.R2_REGION ?? "auto",
+          credentials: {
+            accessKeyId: process.env.R2_ACCESS_KEY_ID!,
+            secretAccessKey: process.env.R2_SECRET_ACCESS_KEY!
+          },
+          forcePathStyle: true
+        }
+      })
+    ]
+  : [];
+
 export default buildConfig({
   secret: process.env.PAYLOAD_SECRET ?? "dev-secret-change-in-production",
   sharp,
@@ -108,6 +133,7 @@ export default buildConfig({
   csrf: allowedOrigins,
   editor: lexicalEditor({}),
   db: dbAdapter,
+  plugins: storagePlugins,
   collections: [Users, Members, Media, Brands, Categories, Products, Reviews, SitePages, LocaleEntries],
   typescript: { outputFile: path.resolve(dirname, "payload-types.ts") },
   upload: { limits: { fileSize: 10 * 1024 * 1024 } }

@@ -2,7 +2,9 @@
   "name": "site_cbike_show",
   "version": "0.1.0",
   "private": true,
-  "engines": { "node": ">=20.18" },
+  "engines": {
+    "node": ">=20.18"
+  },
   "scripts": {
     "dev": "next dev --webpack",
     "build": "rm -rf .next && next build",
@@ -23,6 +25,7 @@
     "@payloadcms/email-nodemailer": "^3.84.1",
     "@payloadcms/next": "^3.84.1",
     "@payloadcms/richtext-lexical": "^3.84.1",
+    "@payloadcms/storage-s3": "^3.85.0",
     "@payloadcms/translations": "^3.84.1",
     "@payloadcms/ui": "^3.84.1",
     "@tailwindcss/postcss": "^4",
