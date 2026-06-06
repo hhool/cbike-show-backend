@@ -76,16 +76,31 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
         overrideAccess: true,
       });
 
-      if (existing.docs.length) return existing.docs[0];
+      if (existing.docs.length) {
+        const doc = existing.docs[0] as any;
+        const desiredName = normalizedSlug === 'carseat' ? '安全座椅' : '婴儿推车';
+        const currentName = typeof doc.name === 'string' ? doc.name : '';
+        if (currentName.startsWith('{') || currentName !== desiredName) {
+          return payload.update({
+            collection: 'categories',
+            id: doc.id,
+            overrideAccess: true,
+            data: {
+              name: desiredName,
+              kind: 'stroller',
+              ageRange: '0-4y',
+            },
+          });
+        }
+        return doc;
+      }
 
       return payload.create({
         collection: 'categories',
         overrideAccess: true,
         data: {
           slug: normalizedSlug,
-          name: normalizedSlug === 'carseat'
-            ? { en: 'Car Seat', zh: '安全座椅' }
-            : { en: 'Stroller', zh: '婴儿推车' },
+          name: normalizedSlug === 'carseat' ? '安全座椅' : '婴儿推车',
           // Current schema does not support a dedicated carseat kind; map to stroller for now.
           kind: 'stroller',
           ageRange: normalizedSlug === 'carseat' ? '0-4y' : '0-4y',
