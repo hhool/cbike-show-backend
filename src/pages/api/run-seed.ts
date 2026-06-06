@@ -114,6 +114,7 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse)
           slug: item.slug,
           brand: brand.id,
           category: category.id,
+          _status: 'published',
           summary: {
             en: item.description?.en || '',
             zh: item.description?.zh || '',
