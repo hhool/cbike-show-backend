@@ -1,0 +1,72 @@
+[
+  {
+    "brand": "Uppababy",
+    "slug": "uppababy-2026-vista",
+    "title": { "en": "Uppababy Vista V2", "zh": "Uppababy Vista V2 推车" },
+    "description": { "en": "Premium full-size stroller with modular bassinet and toddler seat.", "zh": "高端全能推车，支持摇篮与婴儿座椅模块化组合。" },
+    "category": "stroller",
+    "images": [
+      { "url": "https://via.placeholder.com/1200x800.png?text=Uppababy+Vista+V2", "alt": "Uppababy Vista V2" }
+    ]
+  },
+  {
+    "brand": "Uppababy",
+    "slug": "uppababy-minu",
+    "title": { "en": "Uppababy Minu", "zh": "Uppababy Minu 便携推车" },
+    "description": { "en": "Lightweight travel stroller, folds compactly for transit.", "zh": "轻量旅行推车，折叠紧凑便于出行。" },
+    "category": "stroller",
+    "images": [
+      { "url": "https://via.placeholder.com/1200x800.png?text=Uppababy+Minu", "alt": "Uppababy Minu" }
+    ]
+  },
+  {
+    "brand": "Mockingbird",
+    "slug": "mockingbird-one",
+    "title": { "en": "Mockingbird One", "zh": "Mockingbird One 推车" },
+    "description": { "en": "Budget-friendly full-size stroller with smooth ride.", "zh": "亲民价位的全能推车，行驶顺滑。" },
+    "category": "stroller",
+    "images": [
+      { "url": "https://via.placeholder.com/1200x800.png?text=Mockingbird+One", "alt": "Mockingbird One" }
+    ]
+  },
+  {
+    "brand": "Mockingbird",
+    "slug": "mockingbird-twin",
+    "title": { "en": "Mockingbird Twin", "zh": "Mockingbird Twin 双人推车" },
+    "description": { "en": "Modular twin-capable stroller that grows with your family.", "zh": "支持双胞胎或扩展的模块化推车，随家庭成长。" },
+    "category": "stroller",
+    "images": [
+      { "url": "https://via.placeholder.com/1200x800.png?text=Mockingbird+Twin", "alt": "Mockingbird Twin" }
+    ]
+  },
+  {
+    "brand": "Bebe Confort",
+    "slug": "bebeconfort-urbana",
+    "title": { "en": "Bebe Confort Urbana", "zh": "Bebe Confort Urbana 推车" },
+    "description": { "en": "Comfort-focused stroller with adjustable recline and canopy.", "zh": "注重舒适性的推车，带可调节靠背和遮阳蓬。" },
+    "category": "stroller",
+    "images": [
+      { "url": "https://via.placeholder.com/1200x800.png?text=Bebe+Confort+Urbana", "alt": "Bebe Confort Urbana" }
+    ]
+  },
+  {
+    "brand": "Bebe Confort",
+    "slug": "bebeconfort-compact",
+    "title": { "en": "Bebe Confort Compact", "zh": "Bebe Confort Compact 轻便推车" },
+    "description": { "en": "Small-frame stroller ideal for city life.", "zh": "小巧车架，城市出行理想选择。" },
+    "category": "stroller",
+    "images": [
+      { "url": "https://via.placeholder.com/1200x800.png?text=Bebe+Confort+Compact", "alt": "Bebe Confort Compact" }
+    ]
+  },
+  {
+    "brand": "Bebe Confort",
+    "slug": "bebeconfort-carseat-2026",
+    "title": { "en": "Bebe Confort Car Seat 2026", "zh": "Bebe Confort 安全座椅 2026" },
+    "description": { "en": "Rear-facing car seat with high safety ratings.", "zh": "后向安装安全座椅，具备高安全评级。" },
+    "category": "carseat",
+    "images": [
+      { "url": "https://via.placeholder.com/1200x800.png?text=Bebe+Confort+Carseat+2026", "alt": "Bebe Confort Carseat" }
+    ]
+  }
+]
