@@ -9,30 +9,35 @@ import sharp from "sharp";
 import path from "path";
 import { fileURLToPath } from "url";
 
-import { Users } from "./src/payload/collections/Users.ts";
-import { Members } from "./src/payload/collections/Members.ts";
-import { Media } from "./src/payload/collections/Media.ts";
-import { Brands } from "./src/payload/collections/Brands.ts";
-import { Categories } from "./src/payload/collections/Categories.ts";
-import { Products } from "./src/payload/collections/Products.ts";
-import { Reviews } from "./src/payload/collections/Reviews.ts";
-import { SitePages } from "./src/payload/collections/SitePages.ts";
-import { LocaleEntries } from "./src/payload/collections/LocaleEntries.ts";
+import { Users } from "./src/payload/collections/Users.js";
+import { Members } from "./src/payload/collections/Members.js";
+import { Media } from "./src/payload/collections/Media.js";
+import { Brands } from "./src/payload/collections/Brands.js";
+import { Categories } from "./src/payload/collections/Categories.js";
+import { Products } from "./src/payload/collections/Products.js";
+import { Reviews } from "./src/payload/collections/Reviews.js";
+import { SitePages } from "./src/payload/collections/SitePages.js";
+import { LocaleEntries } from "./src/payload/collections/LocaleEntries.js";
 
 const filename = fileURLToPath(import.meta.url);
 const dirname = path.dirname(filename);
 const isProduction = process.env.NODE_ENV === "production";
+const isVercel = process.env.VERCEL === "true";
 const isRender = process.env.RENDER === "true";
 const rawDatabaseURL = process.env.DATABASE_URL;
 
-// On Render production, fail fast if DATABASE_URL is missing or accidentally points to local SQLite.
-if (isProduction && isRender && !rawDatabaseURL) {
-  throw new Error("DATABASE_URL is required in production. Set a Postgres URL (Neon recommended).");
+// On Vercel/Render production, fail fast if DATABASE_URL is missing or points to local SQLite.
+if (isProduction && (isVercel || isRender) && !rawDatabaseURL) {
+  throw new Error(
+    "DATABASE_URL is required in production. Set a PostgreSQL URL (Neon recommended: https://neon.tech)."
+  );
 }
 
 const databaseURL = process.env.DATABASE_URL ?? `file:${path.resolve(dirname, "payload.db")}`;
-if (isProduction && isRender && databaseURL.startsWith("file:")) {
-  throw new Error("Invalid production database configuration: SQLite fallback is disabled in production.");
+if (isProduction && (isVercel || isRender) && databaseURL.startsWith("file:")) {
+  throw new Error(
+    "SQLite not supported on Vercel/Render. Set DATABASE_URL to a PostgreSQL connection string."
+  );
 }
 
 const hasSmtp = Boolean(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
