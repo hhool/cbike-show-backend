@@ -27,7 +27,7 @@ export default async function BrandRegionPage({ params, searchParams }: BrandReg
     notFound();
   }
 
-  const { payload, fallbackLocale } = await getSitePageBySlug("brands", locale);
+  const { payload } = await getSitePageBySlug("brands", locale);
 
   const whereClause: Record<string, unknown> = {
     region: {
@@ -43,7 +43,6 @@ export default async function BrandRegionPage({ params, searchParams }: BrandReg
     limit: 200,
     pagination: false,
     locale,
-    fallbackLocale,
     sort: "-priorityScore",
     where: whereClause,
     depth: 0,

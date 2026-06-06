@@ -12,14 +12,13 @@ export default async function ProductDetailPage({ params, searchParams }: Produc
   const resolvedSearchParams = (await searchParams) || {};
   const locale = pickLocale(resolvedSearchParams.lang);
 
-  const { payload, fallbackLocale } = await getSitePageBySlug("products", locale);
+  const { payload } = await getSitePageBySlug("products", locale);
 
   const result = await payload.find({
     collection: "products",
     limit: 1,
     pagination: false,
     locale,
-    fallbackLocale,
     depth: 1,
     where: {
       and: [

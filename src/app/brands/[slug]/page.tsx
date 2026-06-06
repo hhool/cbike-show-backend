@@ -12,14 +12,13 @@ export default async function BrandDetailPage({ params, searchParams }: BrandDet
   const resolvedSearchParams = (await searchParams) || {};
   const locale = pickLocale(resolvedSearchParams.lang);
 
-  const { payload, fallbackLocale } = await getSitePageBySlug("brands", locale);
+  const { payload } = await getSitePageBySlug("brands", locale);
 
   const brandResult = await payload.find({
     collection: "brands",
     limit: 1,
     pagination: false,
     locale,
-    fallbackLocale,
     where: {
       slug: { equals: resolvedParams.slug },
     },
@@ -61,7 +60,6 @@ export default async function BrandDetailPage({ params, searchParams }: BrandDet
     collection: "products",
     limit: 8,
     locale,
-    fallbackLocale,
     depth: 1,
     sort: "-updatedAt",
     where: {
@@ -76,7 +74,6 @@ export default async function BrandDetailPage({ params, searchParams }: BrandDet
     collection: "reviews",
     limit: 30,
     locale,
-    fallbackLocale,
     depth: 1,
     sort: "-publishedAt",
     where: {
@@ -103,7 +100,6 @@ export default async function BrandDetailPage({ params, searchParams }: BrandDet
     limit: 20,
     pagination: false,
     locale,
-    fallbackLocale,
     sort: "-priorityScore",
     where: {
       and: [

@@ -12,14 +12,13 @@ export default async function ReviewDetailPage({ params, searchParams }: ReviewD
   const resolvedSearchParams = (await searchParams) || {};
   const locale = pickLocale(resolvedSearchParams.lang);
 
-  const { payload, fallbackLocale } = await getSitePageBySlug("reviews", locale);
+  const { payload } = await getSitePageBySlug("reviews", locale);
 
   const result = await payload.find({
     collection: "reviews",
     limit: 1,
     pagination: false,
     locale,
-    fallbackLocale,
     depth: 1,
     where: {
       and: [

@@ -10,7 +10,7 @@ export default async function ReviewsPage({ searchParams }: ReviewsPageProps) {
   const locale = pickLocale(params.lang);
   const type = (params.type || "").trim();
 
-  const { payload, page, fallbackLocale } = await getSitePageBySlug("reviews", locale);
+  const { payload, page } = await getSitePageBySlug("reviews", locale);
 
   const whereClause: Record<string, unknown> = {
     _status: {
@@ -26,7 +26,6 @@ export default async function ReviewsPage({ searchParams }: ReviewsPageProps) {
     limit: 12,
     sort: "-publishedAt",
     locale,
-    fallbackLocale,
     depth: 1,
     where: whereClause,
   });
@@ -59,7 +58,7 @@ export default async function ReviewsPage({ searchParams }: ReviewsPageProps) {
         <h1 style={{ margin: 0, fontSize: 34 }}>{title}</h1>
         <p style={{ marginTop: 10, color: "#55646d" }}>{subtitle}</p>
         <Link href={locale === "en" ? "/reviews?lang=zh" : "/reviews?lang=en"} style={{ color: "#1c5b88", textDecoration: "none", fontWeight: 600 }}>
-          {localeMap["reviews.switchTo"] || (locale === "en" ? "Switch to 中文" : "Switch to English")}
+          {localeMap["reviews.switchTo"] || (locale === "en" ? "Switch to Chinese" : "切换到英文")}
         </Link>
       </header>
 

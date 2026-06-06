@@ -13,7 +13,6 @@ function pickLocale(lang?: string): "en" | "zh" {
 export default async function HomePage({ searchParams }: HomePageProps) {
   const params = (await searchParams) || {};
   const locale = pickLocale(params.lang);
-  const fallbackLocale = locale === "en" ? "zh" : "en";
 
   const payload = await getPayload({ config });
   const pageResult = await payload.find({
@@ -22,12 +21,11 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     limit: 1,
     pagination: false,
     locale,
-    fallbackLocale,
     depth: 0,
   });
 
   const page = pageResult.docs[0];
-  const title = page?.heroTitle || page?.title || "童车评测实验室";
+  const title = page?.heroTitle || page?.title || (locale === "en" ? "Cbike Review Lab" : "童车评测实验室");
   const subtitle =
     page?.heroSubtitle ||
     (locale === "en"
@@ -42,10 +40,10 @@ export default async function HomePage({ searchParams }: HomePageProps) {
     limit: 1,
     pagination: false,
     locale,
-    fallbackLocale,
     depth: 0,
   });
   const localeHint = localeHintResult.docs[0]?.value || (locale === "en" ? "Switch language:" : "切换语言:");
+  const localeTarget = locale === "en" ? "Chinese" : "英文";
 
   return (
     <main style={{ maxWidth: 860, margin: "48px auto", padding: "0 20px", fontFamily: "-apple-system, BlinkMacSystemFont, Segoe UI, sans-serif" }}>
@@ -57,7 +55,7 @@ export default async function HomePage({ searchParams }: HomePageProps) {
             {ctaLabel}
           </Link>
           <Link href={locale === "en" ? "/?lang=zh" : "/?lang=en"} style={{ padding: "10px 16px", borderRadius: 10, border: "1px solid #c8d9e5", color: "#1d3b53", textDecoration: "none", fontWeight: 600 }}>
-            {localeHint} {locale === "en" ? "中文" : "English"}
+            {localeHint} {localeTarget}
           </Link>
         </div>
       </header>

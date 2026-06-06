@@ -12,7 +12,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   const region = (params.region || "").trim();
   const brandSlug = (params.brand || "").trim();
 
-  const { payload, page, fallbackLocale } = await getSitePageBySlug("products", locale);
+  const { payload, page } = await getSitePageBySlug("products", locale);
 
   let brandIdsByRegion: number[] = [];
   if (region) {
@@ -33,7 +33,6 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
       limit: 1,
       pagination: false,
       locale,
-      fallbackLocale,
       where: { slug: { equals: brandSlug } },
       depth: 0,
     });
@@ -67,7 +66,6 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
     limit: 8,
     pagination: false,
     locale,
-    fallbackLocale,
     sort: "-priorityScore",
     ...(region ? { where: { region: { equals: region } } } : {}),
     depth: 0,
@@ -78,7 +76,6 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
     limit: 12,
     sort: "-updatedAt",
     locale,
-    fallbackLocale,
     depth: 1,
     where: whereClause,
   });
@@ -110,7 +107,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
         <h1 style={{ margin: 0, fontSize: 34 }}>{title}</h1>
         <p style={{ marginTop: 10, color: "#55646d" }}>{subtitle}</p>
         <Link href={locale === "en" ? "/products?lang=zh" : "/products?lang=en"} style={{ color: "#1c5b88", textDecoration: "none", fontWeight: 600 }}>
-          {localeMap["products.switchTo"] || (locale === "en" ? "Switch to 中文" : "Switch to English")}
+          {localeMap["products.switchTo"] || (locale === "en" ? "Switch to Chinese" : "切换到英文")}
         </Link>
       </header>
 

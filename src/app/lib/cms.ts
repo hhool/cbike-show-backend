@@ -7,7 +7,6 @@ export function pickLocale(lang?: string): "en" | "zh" {
 
 export async function getSitePageBySlug(slug: string, locale: "en" | "zh") {
   const payload = await getPayload({ config });
-  const fallbackLocale = locale === "en" ? "zh" : "en";
 
   const pageResult = await payload.find({
     collection: "site-pages",
@@ -15,11 +14,10 @@ export async function getSitePageBySlug(slug: string, locale: "en" | "zh") {
     limit: 1,
     pagination: false,
     locale,
-    fallbackLocale,
     depth: 0,
   });
 
-  return { payload, page: pageResult.docs[0], fallbackLocale };
+  return { payload, page: pageResult.docs[0] };
 }
 
 export async function getLocaleEntryMap(
@@ -29,13 +27,11 @@ export async function getLocaleEntryMap(
   if (keys.length === 0) return {};
 
   const payload = await getPayload({ config });
-  const fallbackLocale = locale === "en" ? "zh" : "en";
   const result = await payload.find({
     collection: "locale-entries",
     pagination: false,
     limit: Math.max(keys.length, 20),
     locale,
-    fallbackLocale,
     where: {
       key: {
         in: keys,

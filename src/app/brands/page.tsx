@@ -21,7 +21,7 @@ export default async function BrandsPage({ searchParams }: BrandsPageProps) {
   const region = (params.region || "").trim();
   const country = (params.country || "").trim();
 
-  const { payload, page, fallbackLocale } = await getSitePageBySlug("brands", locale);
+  const { payload, page } = await getSitePageBySlug("brands", locale);
 
   const whereClause: Record<string, unknown> = {};
   if (region) {
@@ -37,7 +37,6 @@ export default async function BrandsPage({ searchParams }: BrandsPageProps) {
     pagination: false,
     sort: "-priorityScore",
     locale,
-    fallbackLocale,
     where: whereClause,
     depth: 0,
   });
@@ -92,7 +91,7 @@ export default async function BrandsPage({ searchParams }: BrandsPageProps) {
         <p style={{ marginTop: 10, color: "#55646d" }}>{subtitle}</p>
         <p style={{ margin: "8px 0 0" }}>
           <Link href={locale === "en" ? "/brands?lang=zh" : "/brands?lang=en"} style={{ color: "#1c5b88", textDecoration: "none", fontWeight: 600 }}>
-            {localeMap["brands.switchTo"] || (locale === "en" ? "Switch to 中文" : "Switch to English")}
+            {localeMap["brands.switchTo"] || (locale === "en" ? "Switch to Chinese" : "切换到英文")}
           </Link>
         </p>
         <p style={{ margin: "10px 0 0", display: "flex", gap: 12, flexWrap: "wrap" }}>
