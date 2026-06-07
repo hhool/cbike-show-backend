@@ -48,6 +48,23 @@ const hasR2Storage = Boolean(
     process.env.R2_ACCESS_KEY_ID &&
     process.env.R2_SECRET_ACCESS_KEY
 );
+
+if (hasR2Storage) {
+  const r2Endpoint = process.env.R2_ENDPOINT!;
+  const r2Region = process.env.R2_REGION ?? "auto";
+
+  if (!/^https?:\/\//i.test(r2Endpoint)) {
+    throw new Error(
+      `R2_ENDPOINT is invalid: "${r2Endpoint}". It must start with http:// or https://`
+    );
+  }
+
+  if (r2Region.includes("://")) {
+    throw new Error(
+      `R2_REGION is invalid: "${r2Region}". Use a region code (R2 recommends \"auto\"), not a URL.`
+    );
+  }
+}
 const localOrigins = [
   "http://127.0.0.1:3000",
   "http://localhost:3000",
