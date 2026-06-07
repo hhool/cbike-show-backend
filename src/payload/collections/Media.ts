@@ -109,23 +109,37 @@ export const Media: CollectionConfig = {
 
                     if (noChange) return doc;
 
-                    await req.payload.update({
-                      collection: "media",
-                      id: doc.id,
-                      data: {
-                        prefix,
-                        storageEnv,
-                        entityType,
-                        entityId,
-                        storageVersion: doc.storageVersion || 2,
-                        storageKeyOriginal: nextOriginal,
-                        storageKeyThumb: nextThumb,
-                        storageKeyCard: nextCard,
-                        storageKeyHero: nextHero
-                      },
-                      overrideAccess: true,
-                      context: { ...req.context, skipStorageKeySync: true, skipCloudStorage: true }
-                    });
+                    try {
+                      await req.payload.update({
+                        collection: "media",
+                        id: doc.id,
+                        data: {
+                          prefix,
+                          storageEnv,
+                          entityType,
+                          entityId,
+                          storageVersion: doc.storageVersion || 2,
+                          storageKeyOriginal: nextOriginal,
+                          storageKeyThumb: nextThumb,
+                          storageKeyCard: nextCard,
+                          storageKeyHero: nextHero
+                        },
+                        overrideAccess: true,
+                        context: { ...req.context, skipStorageKeySync: true, skipCloudStorage: true }
+                      });
+                    } catch (error) {
+                      const message = error instanceof Error ? error.message.toLowerCase() : String(error).toLowerCase();
+                      const code = error instanceof Error && "code" in error ? String((error as Error & { code?: string }).code || "").toLowerCase() : "";
+                      const isNotFound = code === "not_found" || code === "404" || message.includes("not found") || message.includes("未找到");
+
+                      if (!isNotFound) {
+                        throw error;
+                      }
+
+                      req.payload.logger.warn(
+                        `Media metadata sync skipped because the follow-up update could not find doc ${doc.id}; save will still succeed.`
+                      );
+                    }
 
                     return doc;
                   }
