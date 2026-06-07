@@ -46,9 +46,37 @@ export const Media: CollectionConfig = {
     delete: ({ req }) => Boolean(req.user)
   },
   ...(mediaUpload ? { upload: mediaUpload } : {}),
-  ...(hasR2Storage
-    ? {
-        hooks: {
+  hooks: {
+    beforeOperation: [
+      ({ args }) => {
+        if (!args || typeof args !== "object") return args;
+
+        const nextData = "data" in args && args.data && typeof args.data === "object" ? args.data : undefined;
+        if (!nextData) return args;
+
+        const storageEnv = (nextData.storageEnv || resolveStorageEnv()) as "prod" | "preview" | "dev";
+        const entityType = (nextData.entityType || "common") as StorageEntityType;
+        const entityId = String(nextData.entityId || "common");
+
+        if (!nextData.prefix) {
+          nextData.prefix = buildStoragePrefix({
+            env: storageEnv,
+            entityType,
+            entityId,
+            now: nextData.createdAt ? new Date(nextData.createdAt) : new Date()
+          });
+        }
+
+        nextData.storageEnv = storageEnv;
+        nextData.entityType = entityType;
+        nextData.entityId = entityId;
+        nextData.storageVersion = nextData.storageVersion || 2;
+
+        return args;
+      }
+    ],
+    ...(hasR2Storage
+      ? {
           beforeValidate: [
             ({ data }) => {
               if (!data) return data;
