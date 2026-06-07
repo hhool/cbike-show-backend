@@ -43,3 +43,6 @@ yarn-error.log*
 next-env.d.ts
 payload.db
 .env*.local
+
+# runtime upload artifacts
+/public/media/
