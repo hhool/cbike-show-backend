@@ -1,5 +1,5 @@
 import type { CollectionConfig } from "payload";
-import { buildStorageKeys, resolveStorageEnv, type StorageEntityType } from "../utils/storageKeys";
+import { buildStoragePrefix, resolveStorageEnv, type StorageEntityType } from "../utils/storageKeys";
 
 const isVercel = process.env.VERCEL === "true";
 const hasR2Storage = Boolean(
@@ -41,61 +41,92 @@ export const Media: CollectionConfig = {
   admin: { group: { en: "Assets", zh: "媒体资源" } },
   access: { read: () => true },
   ...(mediaUpload ? { upload: mediaUpload } : {}),
-  ...(mediaStorageMetadataEnabled
+  ...(hasR2Storage
     ? {
         hooks: {
           beforeValidate: [
             ({ data }) => {
               if (!data) return data;
 
-              data.storageEnv = data.storageEnv || resolveStorageEnv();
-              data.storageVersion = data.storageVersion || 2;
-              data.entityType = (data.entityType || "common") as StorageEntityType;
-              data.entityId = data.entityId || "common";
+              const storageEnv = (data.storageEnv || resolveStorageEnv()) as "prod" | "preview" | "dev";
+              const entityType = (data.entityType || "common") as StorageEntityType;
+              const entityId = String(data.entityId || "common");
+
+              if (!data.prefix) {
+                data.prefix = buildStoragePrefix({
+                  env: storageEnv,
+                  entityType,
+                  entityId,
+                  now: data.createdAt ? new Date(data.createdAt) : new Date()
+                });
+              }
+
+              if (mediaStorageMetadataEnabled) {
+                data.storageEnv = storageEnv;
+                data.storageVersion = data.storageVersion || 2;
+                data.entityType = entityType;
+                data.entityId = entityId;
+              }
 
               return data;
             }
           ],
-          afterChange: [
-            async ({ doc, req }) => {
-              if (!hasR2Storage) return doc;
-              if (!doc?.id || !doc?.filename) return doc;
-              if (req.context?.skipStorageKeySync) return doc;
+          ...(mediaStorageMetadataEnabled
+            ? {
+                afterChange: [
+                  async ({ doc, req }) => {
+                    if (!doc?.id || !doc?.filename) return doc;
+                    if (req.context?.skipStorageKeySync) return doc;
 
-              const hasAllKeys = Boolean(
-                doc.storageKeyOriginal &&
-                  doc.storageKeyThumb &&
-                  doc.storageKeyCard &&
-                  doc.storageKeyHero
-              );
+                    const storageEnv = (doc.storageEnv || resolveStorageEnv()) as "prod" | "preview" | "dev";
+                    const entityType = (doc.entityType || "common") as StorageEntityType;
+                    const entityId = String(doc.entityId || doc.id || "common");
+                    const prefix = doc.prefix || buildStoragePrefix({
+                      env: storageEnv,
+                      entityType,
+                      entityId,
+                      now: doc.createdAt ? new Date(doc.createdAt) : new Date()
+                    });
 
-              if (hasAllKeys) return doc;
+                    const nextOriginal = `${prefix}/${String(doc.filename)}`;
+                    const nextThumb = doc?.sizes?.thumb?.filename ? `${prefix}/${doc.sizes.thumb.filename}` : doc.storageKeyThumb;
+                    const nextCard = doc?.sizes?.card?.filename ? `${prefix}/${doc.sizes.card.filename}` : doc.storageKeyCard;
+                    const nextHero = doc?.sizes?.hero?.filename ? `${prefix}/${doc.sizes.hero.filename}` : doc.storageKeyHero;
 
-              const keys = buildStorageKeys({
-                env: (doc.storageEnv || resolveStorageEnv()) as "prod" | "preview" | "dev",
-                entityType: (doc.entityType || "common") as StorageEntityType,
-                entityId: String(doc.entityId || doc.id || "common"),
-                now: doc.createdAt ? new Date(doc.createdAt) : new Date(),
-                filename: String(doc.filename)
-              });
+                    const hasAllKeys = Boolean(doc.storageKeyOriginal && doc.storageKeyThumb && doc.storageKeyCard && doc.storageKeyHero);
+                    const noChange =
+                      hasAllKeys &&
+                      doc.prefix === prefix &&
+                      doc.storageKeyOriginal === nextOriginal &&
+                      doc.storageKeyThumb === nextThumb &&
+                      doc.storageKeyCard === nextCard &&
+                      doc.storageKeyHero === nextHero;
 
-              await req.payload.update({
-                collection: "media",
-                id: doc.id,
-                data: {
-                  storageKeyOriginal: keys.original,
-                  storageKeyThumb: keys.thumb,
-                  storageKeyCard: keys.card,
-                  storageKeyHero: keys.hero,
-                  storageVersion: doc.storageVersion || 2
-                },
-                overrideAccess: true,
-                context: { ...req.context, skipStorageKeySync: true }
-              });
+                    if (noChange) return doc;
 
-              return doc;
-            }
-          ]
+                    await req.payload.update({
+                      collection: "media",
+                      id: doc.id,
+                      data: {
+                        prefix,
+                        storageEnv,
+                        entityType,
+                        entityId,
+                        storageVersion: doc.storageVersion || 2,
+                        storageKeyOriginal: nextOriginal,
+                        storageKeyThumb: nextThumb,
+                        storageKeyCard: nextCard,
+                        storageKeyHero: nextHero
+                      },
+                      overrideAccess: true,
+                      context: { ...req.context, skipStorageKeySync: true, skipCloudStorage: true }
+                    });
+
+                    return doc;
+                  }
+                ]
+              }
+            : {})
         }
       }
     : {}),

@@ -49,3 +49,17 @@ export const buildStorageKeys = ({ env, entityType, entityId, now = new Date(), 
     hero: `${prefix}/hero/${baseName}`,
   };
 };
+
+export const buildStoragePrefix = ({
+  env,
+  entityType,
+  entityId,
+  now = new Date(),
+}: Omit<StorageKeyInput, "filename">) => {
+  const yyyy = String(now.getUTCFullYear());
+  const mm = String(now.getUTCMonth() + 1).padStart(2, "0");
+  const safeType = sanitizeSegment(entityType);
+  const safeEntityId = sanitizeSegment(entityId);
+
+  return `${env}/media/${yyyy}/${mm}/${safeType}/${safeEntityId}`;
+};
