@@ -12,6 +12,7 @@ if ! command -v psql >/dev/null 2>&1; then
 fi
 
 EXPECTED_COLUMNS=(
+  prefix
   storage_env
   entity_type
   entity_id
@@ -28,6 +29,7 @@ FROM information_schema.columns
 WHERE table_schema = 'public'
   AND table_name = 'media'
   AND column_name IN (
+    'prefix',
     'storage_env',
     'entity_type',
     'entity_id',

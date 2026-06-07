@@ -2,6 +2,7 @@
 -- Safe to run multiple times because of IF NOT EXISTS guards.
 
 ALTER TABLE IF EXISTS media
+  ADD COLUMN IF NOT EXISTS prefix TEXT,
   ADD COLUMN IF NOT EXISTS storage_env TEXT,
   ADD COLUMN IF NOT EXISTS entity_type TEXT,
   ADD COLUMN IF NOT EXISTS entity_id TEXT,

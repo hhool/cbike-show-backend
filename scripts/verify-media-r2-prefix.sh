@@ -35,11 +35,29 @@ fi
 
 ENCODED_FILENAME="$(node -e 'console.log(encodeURIComponent(process.argv[1]))' "$FILENAME")"
 URL="$BACKEND_BASE_URL/api/media?limit=1&sort=-createdAt&where[filename][equals]=$ENCODED_FILENAME"
-RESP="$(curl -g -sS "$URL")"
+RESP_WITH_CODE="$(curl -g -sS -w '\n%{http_code}' "$URL")"
+HTTP_CODE="$(printf '%s' "$RESP_WITH_CODE" | tail -n 1)"
+RESP="$(printf '%s' "$RESP_WITH_CODE" | sed '$d')"
 
-node - "$FILENAME" "$RESP" <<'NODE'
+node - "$FILENAME" "$HTTP_CODE" "$RESP" <<'NODE'
 const filename = process.argv[2];
-const payload = JSON.parse(process.argv[3]);
+const httpCode = Number(process.argv[3]);
+const body = process.argv[4];
+
+let payload;
+try {
+  payload = JSON.parse(body);
+} catch {
+  console.log(`[verify] ERROR: media API returned non-JSON response (status=${httpCode || 'unknown'})`);
+  process.exit(4);
+}
+
+if (httpCode >= 400 || (Array.isArray(payload?.errors) && payload.errors.length > 0)) {
+  const firstError = payload?.errors?.[0]?.message || 'unknown error';
+  console.log(`[verify] ERROR: media API request failed (status=${httpCode}, message=${firstError})`);
+  process.exit(4);
+}
+
 const doc = payload?.docs?.[0];
 
 if (!doc) {
