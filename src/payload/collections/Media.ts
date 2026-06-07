@@ -39,7 +39,12 @@ export const Media: CollectionConfig = {
   slug: "media",
   labels: { singular: { en: "Media", zh: "媒体" }, plural: { en: "Media", zh: "媒体" } },
   admin: { group: { en: "Assets", zh: "媒体资源" } },
-  access: { read: () => true },
+  access: {
+    read: () => true,
+    create: ({ req }) => Boolean(req.user),
+    update: ({ req }) => Boolean(req.user),
+    delete: ({ req }) => Boolean(req.user)
+  },
   ...(mediaUpload ? { upload: mediaUpload } : {}),
   ...(hasR2Storage
     ? {
