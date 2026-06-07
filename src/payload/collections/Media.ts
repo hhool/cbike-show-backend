@@ -152,6 +152,11 @@ export const Media: CollectionConfig = {
   fields: [
     { name: "alt", type: "text", required: true, label: { en: "Alt Text", zh: "Alt 描述" } },
     { name: "credit", type: "text", admin: { description: "图片版权署名(自摄/品牌素材/Unsplash 等)" } },
+    {
+      name: "prefix",
+      type: "text",
+      admin: { position: "sidebar", readOnly: true, hidden: true }
+    },
     ...(mediaStorageMetadataEnabled
       ? [
           {
