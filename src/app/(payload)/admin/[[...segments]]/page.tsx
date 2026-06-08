@@ -191,104 +191,117 @@ export default async function Page({ params, searchParams }: Args) {
 
   return (
     <>
+      {RootPage({ config, params, searchParams, importMap })}
       {isDashboardRoot && (
         <section
           style={{
-            margin: "12px 16px 0",
-            padding: 16,
-            border: "1px solid var(--theme-elevation-150, #dfe6eb)",
-            borderRadius: 8,
-            background: "var(--theme-elevation-0, #ffffff)",
+            margin: "0 16px 16px",
           }}
         >
-          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
-            <div>
-              <h2 style={{ margin: 0, fontSize: 18, color: "var(--theme-text, #1f2933)" }}>后台运营工作台</h2>
-              <p style={{ margin: "6px 0 0", color: "var(--theme-text-light, #5b6670)", fontSize: 13 }}>
-                先看待处理内容，再进入集合编辑，减少后台来回跳转。
-              </p>
-            </div>
-            <a
-              href="/i18n/brands"
+          <details
+            style={{
+              border: "1px solid var(--theme-elevation-150, #dfe6eb)",
+              borderRadius: 8,
+              background: "var(--theme-elevation-0, #ffffff)",
+            }}
+          >
+            <summary
               style={{
-                color: "var(--theme-success-600, #1f7a4d)",
-                fontWeight: 600,
-                textDecoration: "none",
+                cursor: "pointer",
+                padding: "12px 16px",
+                color: "var(--theme-text, #1f2933)",
+                fontWeight: 700,
+                fontSize: 14,
               }}
             >
-              快捷入口: 多语言运营页 (Locale Operations)
-            </a>
-          </div>
+              后台运营工作台
+            </summary>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", gap: 12, marginTop: 16 }}>
-            {stats.map((stat) => (
-              <div key={stat.label} style={statStyle(stat.tone)}>
-                <div style={{ fontSize: 13, color: "var(--theme-text-light, #5b6670)", marginBottom: 8 }}>{stat.label}</div>
-                <div style={{ fontSize: 30, fontWeight: 800, lineHeight: 1, color: "var(--theme-text, #1f2933)" }}>{stat.value}</div>
-                <div style={{ marginTop: 8, fontSize: 12, color: "var(--theme-text-light, #5b6670)" }}>{stat.hint}</div>
-              </div>
-            ))}
-          </div>
-
-          <div style={{ marginTop: 16 }}>
-            <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, flexWrap: "wrap", marginBottom: 10 }}>
-              <div>
-                <h3 style={{ margin: 0, fontSize: 16, color: "var(--theme-text, #1f2933)" }}>待处理任务</h3>
-                <p style={{ margin: "6px 0 0", color: "var(--theme-text-light, #5b6670)", fontSize: 13 }}>这些内容优先处理，能最快改善前台数据完整度。</p>
-              </div>
-            </div>
-
-            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12 }}>
-              {tasks.map((task) => (
-                <a key={task.label} href={task.href} style={taskStyle(task.tone, Number(task.value) > 0)}>
-                  <div style={{ fontSize: 13, color: "var(--theme-text-light, #5b6670)", marginBottom: 8 }}>{task.label}</div>
-                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
-                    <div style={{ fontSize: 30, fontWeight: 800, lineHeight: 1, color: "var(--theme-text, #1f2933)" }}>{task.value}</div>
-                    <span
-                      style={{
-                        fontSize: 11,
-                        fontWeight: 700,
-                        letterSpacing: 0.2,
-                        color: Number(task.value) > 0 ? "var(--theme-success-700, #145a39)" : "var(--theme-text-light, #5b6670)",
-                        background: Number(task.value) > 0 ? "var(--theme-success-100, #eaf6ef)" : "var(--theme-elevation-50, #f6f8fa)",
-                        border: "1px solid",
-                        borderColor: Number(task.value) > 0 ? "var(--theme-success-200, #cfe8d9)" : "var(--theme-elevation-150, #dfe6eb)",
-                        borderRadius: 999,
-                        padding: "2px 8px"
-                      }}
-                    >
-                      {Number(task.value) > 0 ? "需处理" : "已清空"}
-                    </span>
-                  </div>
-                  <div style={{ marginTop: 8, fontSize: 12, color: "var(--theme-text-light, #5b6670)" }}>{task.hint}</div>
+            <div style={{ padding: "0 16px 16px" }}>
+              <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+                <p style={{ margin: "4px 0 0", color: "var(--theme-text-light, #5b6670)", fontSize: 13 }}>
+                  先看待处理内容，再进入集合编辑，减少后台来回跳转。
+                </p>
+                <a
+                  href="/i18n/brands"
+                  style={{
+                    color: "var(--theme-success-600, #1f7a4d)",
+                    fontWeight: 600,
+                    textDecoration: "none",
+                  }}
+                >
+                  快捷入口: 多语言运营页 (Locale Operations)
                 </a>
-              ))}
-            </div>
-          </div>
+              </div>
 
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12, marginTop: 14 }}>
-            {shortcutCards.map((card) => (
-              <a
-                key={card.href}
-                href={card.href}
-                style={{
-                  ...cardStyle(card.tone),
-                  border: "1px solid",
-                  borderRadius: 8,
-                  padding: 14,
-                  color: "var(--theme-text, #1f2933)",
-                  textDecoration: "none",
-                  boxShadow: "none",
-                }}
-              >
-                <div style={{ fontWeight: 800, marginBottom: 8 }}>{card.title}</div>
-                <div style={{ fontSize: 13, lineHeight: 1.55, color: "var(--theme-text-light, #5b6670)" }}>{card.description}</div>
-              </a>
-            ))}
-          </div>
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", gap: 12, marginTop: 12 }}>
+                {stats.map((stat) => (
+                  <div key={stat.label} style={statStyle(stat.tone)}>
+                    <div style={{ fontSize: 13, color: "var(--theme-text-light, #5b6670)", marginBottom: 8 }}>{stat.label}</div>
+                    <div style={{ fontSize: 30, fontWeight: 800, lineHeight: 1, color: "var(--theme-text, #1f2933)" }}>{stat.value}</div>
+                    <div style={{ marginTop: 8, fontSize: 12, color: "var(--theme-text-light, #5b6670)" }}>{stat.hint}</div>
+                  </div>
+                ))}
+              </div>
+
+              <div style={{ marginTop: 16 }}>
+                <div style={{ marginBottom: 10 }}>
+                  <h3 style={{ margin: 0, fontSize: 16, color: "var(--theme-text, #1f2933)" }}>待处理任务</h3>
+                  <p style={{ margin: "6px 0 0", color: "var(--theme-text-light, #5b6670)", fontSize: 13 }}>这些内容优先处理，能最快改善前台数据完整度。</p>
+                </div>
+
+                <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12 }}>
+                  {tasks.map((task) => (
+                    <a key={task.label} href={task.href} style={taskStyle(task.tone, Number(task.value) > 0)}>
+                      <div style={{ fontSize: 13, color: "var(--theme-text-light, #5b6670)", marginBottom: 8 }}>{task.label}</div>
+                      <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+                        <div style={{ fontSize: 30, fontWeight: 800, lineHeight: 1, color: "var(--theme-text, #1f2933)" }}>{task.value}</div>
+                        <span
+                          style={{
+                            fontSize: 11,
+                            fontWeight: 700,
+                            letterSpacing: 0.2,
+                            color: Number(task.value) > 0 ? "var(--theme-success-700, #145a39)" : "var(--theme-text-light, #5b6670)",
+                            background: Number(task.value) > 0 ? "var(--theme-success-100, #eaf6ef)" : "var(--theme-elevation-50, #f6f8fa)",
+                            border: "1px solid",
+                            borderColor: Number(task.value) > 0 ? "var(--theme-success-200, #cfe8d9)" : "var(--theme-elevation-150, #dfe6eb)",
+                            borderRadius: 999,
+                            padding: "2px 8px"
+                          }}
+                        >
+                          {Number(task.value) > 0 ? "需处理" : "已清空"}
+                        </span>
+                      </div>
+                      <div style={{ marginTop: 8, fontSize: 12, color: "var(--theme-text-light, #5b6670)" }}>{task.hint}</div>
+                    </a>
+                  ))}
+                </div>
+              </div>
+
+              <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12, marginTop: 14 }}>
+                {shortcutCards.map((card) => (
+                  <a
+                    key={card.href}
+                    href={card.href}
+                    style={{
+                      ...cardStyle(card.tone),
+                      border: "1px solid",
+                      borderRadius: 8,
+                      padding: 14,
+                      color: "var(--theme-text, #1f2933)",
+                      textDecoration: "none",
+                      boxShadow: "none",
+                    }}
+                  >
+                    <div style={{ fontWeight: 800, marginBottom: 8 }}>{card.title}</div>
+                    <div style={{ fontSize: 13, lineHeight: 1.55, color: "var(--theme-text-light, #5b6670)" }}>{card.description}</div>
+                  </a>
+                ))}
+              </div>
+            </div>
+          </details>
         </section>
       )}
-      {RootPage({ config, params, searchParams, importMap })}
     </>
   );
 }
