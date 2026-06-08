@@ -195,7 +195,7 @@ export default async function Page({ params, searchParams }: Args) {
         <section
           style={{
             position: "fixed",
-            top: 64,
+            top: 58,
             left: 16,
             right: 16,
             zIndex: 20,
@@ -206,14 +206,15 @@ export default async function Page({ params, searchParams }: Args) {
               border: "1px solid var(--theme-elevation-150, #dfe6eb)",
               borderRadius: 8,
               background: "var(--theme-elevation-0, #ffffff)",
+              boxShadow: "0 1px 0 rgba(0, 0, 0, 0.04)",
             }}
           >
             <summary
               style={{
                 cursor: "pointer",
-                padding: "12px 16px",
+                padding: "9px 12px",
                 color: "var(--theme-text, #1f2933)",
-                fontSize: 14,
+                fontSize: 13,
                 display: "flex",
                 alignItems: "center",
                 justifyContent: "space-between",
@@ -221,7 +222,7 @@ export default async function Page({ params, searchParams }: Args) {
               }}
             >
               <span style={{ fontWeight: 700 }}>后台运营工作台</span>
-              <span style={{ fontSize: 12, color: "var(--theme-text-light, #5b6670)" }}>默认收起，点击展开</span>
+              <span style={{ fontSize: 11, color: "var(--theme-text-light, #5b6670)" }}>默认收起，点击展开</span>
             </summary>
 
             <div
@@ -314,6 +315,7 @@ export default async function Page({ params, searchParams }: Args) {
           </details>
         </section>
       )}
+      {isDashboardRoot && <div style={{ height: 56 }} />}
       {RootPage({ config, params, searchParams, importMap })}
     </>
   );
