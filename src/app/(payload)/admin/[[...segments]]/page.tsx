@@ -140,10 +140,13 @@ export default async function Page({ params, searchParams }: Args) {
 
   const reviewDocs = reviewsResult.docs.length;
   const publishedReviews = reviewsResult.docs.filter((doc: any) => doc?.status === "published").length;
-  const pendingReviews = reviewsResult.docs.filter((doc: any) => doc?.status && doc.status !== "published" && doc.status !== "archived").length;
+  const draftReviews = reviewsResult.docs.filter((doc: any) => doc?.status === "draft").length;
+  const complianceReviews = reviewsResult.docs.filter((doc: any) => doc?.status === "compliance").length;
+  const chiefReviews = reviewsResult.docs.filter((doc: any) => doc?.status === "chief").length;
   const productDocs = productsResult.docs.length;
   const productsMissingSummary = productsResult.docs.filter((doc: any) => !String(doc?.summary ?? "").trim()).length;
   const localeDocs = localeResult.docs.length;
+  const localesMissingDescription = localeResult.docs.filter((doc: any) => !String(doc?.description ?? "").trim()).length;
   const categoryDocs = categoriesResult.docs.length;
   const categoriesMissingAgeRange = categoriesResult.docs.filter((doc: any) => !String(doc?.ageRange ?? "").trim()).length;
 
@@ -155,8 +158,11 @@ export default async function Page({ params, searchParams }: Args) {
   ];
 
   const tasks: TaskCard[] = [
-    { label: "待发布评测", value: String(pendingReviews), hint: "草稿 / 待合规 / 待主编", href: "/admin/collections/reviews", tone: "primary" },
+    { label: "评测草稿 Reviews", value: String(draftReviews), hint: "还没进入审核流", href: "/admin/collections/reviews", tone: "primary" },
+    { label: "待合规 Reviews", value: String(complianceReviews), hint: "需要合规确认", href: "/admin/collections/reviews", tone: "amber" },
+    { label: "待主编 Reviews", value: String(chiefReviews), hint: "等待终审和锁分", href: "/admin/collections/reviews", tone: "slate" },
     { label: "待补摘要产品", value: String(productsMissingSummary), hint: "产品摘要为空", href: "/admin/collections/products", tone: "amber" },
+    { label: "待补说明词条", value: String(localesMissingDescription), hint: "Locale Entries 缺少说明", href: "/i18n/brands?ns=reviews", tone: "mint" },
     { label: "待补年龄段品类", value: String(categoriesMissingAgeRange), hint: "品类年龄段为空", href: "/admin/collections/categories", tone: "slate" }
   ];
 
