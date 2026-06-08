@@ -158,12 +158,12 @@ export default async function Page({ params, searchParams }: Args) {
   ];
 
   const tasks: TaskCard[] = [
-    { label: "评测草稿 Reviews", value: String(draftReviews), hint: "还没进入审核流", href: "/admin/collections/reviews", tone: "primary" },
-    { label: "待合规 Reviews", value: String(complianceReviews), hint: "需要合规确认", href: "/admin/collections/reviews", tone: "amber" },
-    { label: "待主编 Reviews", value: String(chiefReviews), hint: "等待终审和锁分", href: "/admin/collections/reviews", tone: "slate" },
-    { label: "待补摘要产品", value: String(productsMissingSummary), hint: "产品摘要为空", href: "/admin/collections/products", tone: "amber" },
-    { label: "待补说明词条", value: String(localesMissingDescription), hint: "Locale Entries 缺少说明", href: "/i18n/brands?ns=reviews", tone: "mint" },
-    { label: "待补年龄段品类", value: String(categoriesMissingAgeRange), hint: "品类年龄段为空", href: "/admin/collections/categories", tone: "slate" }
+    { label: "评测草稿 Reviews", value: String(draftReviews), hint: "还没进入审核流", href: "/admin/collections/reviews?where[status][equals]=draft", tone: "primary" },
+    { label: "待合规 Reviews", value: String(complianceReviews), hint: "需要合规确认", href: "/admin/collections/reviews?where[status][equals]=compliance", tone: "amber" },
+    { label: "待主编 Reviews", value: String(chiefReviews), hint: "等待终审和锁分", href: "/admin/collections/reviews?where[status][equals]=chief", tone: "slate" },
+    { label: "待补摘要产品", value: String(productsMissingSummary), hint: "产品摘要为空", href: "/admin/collections/products?where[summary][exists]=false", tone: "amber" },
+    { label: "待补说明词条", value: String(localesMissingDescription), hint: "Locale Entries 缺少说明", href: "/admin/collections/locale-entries?where[description][exists]=false", tone: "mint" },
+    { label: "待补年龄段品类", value: String(categoriesMissingAgeRange), hint: "品类年龄段为空", href: "/admin/collections/categories?where[ageRange][exists]=false", tone: "slate" }
   ];
 
   return (
