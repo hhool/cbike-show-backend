@@ -169,21 +169,21 @@ export default async function Page({ params, searchParams }: Args) {
       label: "待补摘要产品",
       value: String(productsMissingSummary),
       hint: "产品摘要为空",
-      href: "/admin/collections/products?where[or][0][summary][exists]=false&where[or][1][summary][equals]=",
+      href: "/admin/collections/products?where[summary][equals]=",
       tone: "amber"
     },
     {
       label: "待补说明词条",
       value: String(localesMissingDescription),
       hint: "Locale Entries 缺少说明",
-      href: "/admin/collections/locale-entries?where[or][0][description][exists]=false&where[or][1][description][equals]=",
+      href: "/admin/collections/locale-entries?where[description][equals]=",
       tone: "mint"
     },
     {
       label: "待补年龄段品类",
       value: String(categoriesMissingAgeRange),
       hint: "品类年龄段为空",
-      href: "/admin/collections/categories?where[or][0][ageRange][exists]=false&where[or][1][ageRange][equals]=",
+      href: "/admin/collections/categories?where[ageRange][equals]=",
       tone: "slate"
     }
   ];
