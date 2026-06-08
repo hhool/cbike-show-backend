@@ -6,12 +6,20 @@ export const Reviews: CollectionConfig = {
   admin: {
     useAsTitle: "title",
     group: { en: "Editorial", zh: "内容编辑" },
-    defaultColumns: ["title", "type", "status", "scoreOverall", "publishedAt"]
+    defaultColumns: ["title", "type", "status", "scoreOverall", "publishedAt"],
+    description: "评测内容建议按当前 locale 单独填写，不要把中文和英文混写在同一个字段里。"
   },
   access: { read: () => true },
   versions: { drafts: true },
   fields: [
-    { name: "title", type: "text", required: true, localized: true },
+    {
+      name: "title",
+      type: "text",
+      required: true,
+      localized: true,
+      label: { en: "Review Title", zh: "评测标题" },
+      admin: { description: "分别在 zh / en locale 下填写对应标题。" }
+    },
     { name: "slug", type: "text", required: true, unique: true, index: true },
     {
       name: "type",
@@ -29,10 +37,22 @@ export const Reviews: CollectionConfig = {
       ],
       admin: { position: "sidebar" }
     },
-    { name: "products", type: "relationship", relationTo: "products", hasMany: true, required: true },
-    { name: "cover", type: "upload", relationTo: "media" },
-    { name: "summary", type: "textarea", localized: true },
-    { name: "body", type: "richText", localized: true },
+    { name: "products", type: "relationship", relationTo: "products", hasMany: true, required: true, label: { en: "Related Products", zh: "关联产品" } },
+    { name: "cover", type: "upload", relationTo: "media", label: { en: "Cover Image", zh: "封面图" } },
+    {
+      name: "summary",
+      type: "textarea",
+      localized: true,
+      label: { en: "Summary", zh: "摘要" },
+      admin: { description: "建议 1 段精简摘要，zh / en 分别维护。" }
+    },
+    {
+      name: "body",
+      type: "richText",
+      localized: true,
+      label: { en: "Review Body", zh: "正文" },
+      admin: { description: "正文按当前语言单独填写，建议分成 3 段，方便前台切分展示。" }
+    },
     {
       name: "scores",
       type: "group",
@@ -45,8 +65,8 @@ export const Reviews: CollectionConfig = {
         { name: "value", type: "number", min: 0, max: 10 }
       ]
     },
-    { name: "scoreOverall", type: "number", min: 0, max: 10, admin: { readOnly: true, position: "sidebar", description: "系统加权计算" } },
-    { name: "scoreLocked", type: "checkbox", defaultValue: false, admin: { position: "sidebar" } },
+    { name: "scoreOverall", type: "number", min: 0, max: 10, admin: { readOnly: true, position: "sidebar", description: "系统按五维评分自动计算" } },
+    { name: "scoreLocked", type: "checkbox", defaultValue: false, admin: { position: "sidebar", description: "主编锁定后不允许手工改分" } },
     {
       name: "status",
       type: "select",
@@ -61,7 +81,7 @@ export const Reviews: CollectionConfig = {
       ],
       admin: { position: "sidebar" }
     },
-    { name: "publishedAt", type: "date", admin: { position: "sidebar" } }
+    { name: "publishedAt", type: "date", admin: { position: "sidebar", description: "前台展示发布日期" } }
   ],
   hooks: {
     beforeChange: [

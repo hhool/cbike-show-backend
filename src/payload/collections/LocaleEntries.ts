@@ -9,7 +9,8 @@ export const LocaleEntries: CollectionConfig = {
   admin: {
     useAsTitle: "key",
     group: { en: "Content", zh: "内容编辑" },
-    defaultColumns: ["namespace", "key", "updatedAt"]
+    defaultColumns: ["namespace", "key", "updatedAt"],
+    description: "用于维护前台/后台的固定文案词条，适合批量检索、校对和补译。"
   },
   access: { read: () => true },
   fields: [
@@ -20,9 +21,11 @@ export const LocaleEntries: CollectionConfig = {
       defaultValue: "common",
       options: [
         { label: "通用（Common）", value: "common" },
+        { label: "后台（Admin）", value: "admin" },
         { label: "首页（Home）", value: "home" },
         { label: "产品（Products）", value: "products" },
         { label: "评测（Reviews）", value: "reviews" },
+        { label: "品类（Categories）", value: "categories" },
         { label: "品牌（Brands）", value: "brands" }
       ]
     },
@@ -33,7 +36,7 @@ export const LocaleEntries: CollectionConfig = {
       unique: true,
       index: true,
       label: { en: "Entry Key", zh: "词条键" },
-      admin: { description: "Use stable keys like home.emptyState." }
+      admin: { description: "建议使用稳定 key，例如 home.emptyState、reviews.filter.single。" }
     },
     {
       name: "value",
@@ -45,7 +48,8 @@ export const LocaleEntries: CollectionConfig = {
     {
       name: "description",
       type: "text",
-      label: { en: "Description", zh: "说明" }
+      label: { en: "Description", zh: "说明" },
+      admin: { description: "用于标记词条用途、上下文或来源。" }
     }
   ],
   timestamps: true

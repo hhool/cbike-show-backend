@@ -12,6 +12,62 @@ type Args = {
   searchParams: Promise<{ [key: string]: string | string[] }>;
 };
 
+type ShortcutCard = {
+  title: string;
+  description: string;
+  href: string;
+  tone: "primary" | "mint" | "amber" | "slate";
+};
+
+const shortcutCards: ShortcutCard[] = [
+  {
+    title: "评测编辑 Review Editing",
+    description: "进入 Review 集合，补齐中英文标题、摘要、正文与评分状态。",
+    href: "/admin/collections/reviews",
+    tone: "primary"
+  },
+  {
+    title: "多语言运营 Locale Ops",
+    description: "批量维护多语言词条，按命名空间检索和更新。",
+    href: "/i18n/brands",
+    tone: "mint"
+  },
+  {
+    title: "产品目录 Products",
+    description: "维护产品主数据、关联品牌/品类、参数与合规认证。",
+    href: "/admin/collections/products",
+    tone: "amber"
+  },
+  {
+    title: "品类管理 Categories",
+    description: "管理品类命名、kind 分类和年龄段说明。",
+    href: "/admin/collections/categories",
+    tone: "slate"
+  },
+  {
+    title: "媒体资源 Media",
+    description: "上传和检查封面、图库与派生图元数据。",
+    href: "/admin/collections/media",
+    tone: "mint"
+  },
+  {
+    title: "站点页面 Site Pages",
+    description: "维护首页、产品页、评测页等可配置页面文案。",
+    href: "/admin/collections/site-pages",
+    tone: "amber"
+  }
+];
+
+function cardStyle(tone: ShortcutCard["tone"]): React.CSSProperties {
+  const palette: Record<ShortcutCard["tone"], React.CSSProperties> = {
+    primary: { borderColor: "#cfe1ef", background: "linear-gradient(135deg, #eef7fd 0%, #ffffff 100%)" },
+    mint: { borderColor: "#cfe9df", background: "linear-gradient(135deg, #eefbf6 0%, #ffffff 100%)" },
+    amber: { borderColor: "#f1dec0", background: "linear-gradient(135deg, #fff7ea 0%, #ffffff 100%)" },
+    slate: { borderColor: "#d8e0e8", background: "linear-gradient(135deg, #f6f9fb 0%, #ffffff 100%)" }
+  };
+  return palette[tone];
+}
+
 export const generateMetadata = ({ params, searchParams }: Args): Promise<Metadata> =>
   generatePageMetadata({ config, params, searchParams });
 
@@ -36,29 +92,55 @@ export default async function Page({ params, searchParams }: Args) {
   return (
     <>
       {isDashboardRoot && (
-        <div
+        <section
           style={{
             margin: "12px 16px 0",
-            padding: "12px 14px",
+            padding: 16,
             border: "1px solid #d8e3ea",
-            borderRadius: 10,
-            background: "#f8fbfd",
+            borderRadius: 14,
+            background: "linear-gradient(180deg, #f8fbfd 0%, #ffffff 100%)",
           }}
         >
-          <a
-            href="/i18n/brands"
-            style={{
-              color: "#174a74",
-              fontWeight: 700,
-              textDecoration: "none",
-            }}
-          >
-            快捷入口: 多语言运营页 (Locale Operations)
-          </a>
-          <p style={{ margin: "6px 0 0", color: "#4f6472", fontSize: 13 }}>
-            支持按命名空间检索与批量更新中英文词条。
-          </p>
-        </div>
+          <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+            <div>
+              <h2 style={{ margin: 0, fontSize: 18, color: "#163a57" }}>后台运营工作台</h2>
+              <p style={{ margin: "6px 0 0", color: "#55646d", fontSize: 13 }}>
+                先看待处理内容，再进入集合编辑，减少后台来回跳转。
+              </p>
+            </div>
+            <a
+              href="/i18n/brands"
+              style={{
+                color: "#174a74",
+                fontWeight: 700,
+                textDecoration: "none",
+              }}
+            >
+              快捷入口: 多语言运营页 (Locale Operations)
+            </a>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12, marginTop: 14 }}>
+            {shortcutCards.map((card) => (
+              <a
+                key={card.href}
+                href={card.href}
+                style={{
+                  ...cardStyle(card.tone),
+                  border: "1px solid",
+                  borderRadius: 14,
+                  padding: 14,
+                  color: "#18313f",
+                  textDecoration: "none",
+                  boxShadow: "0 1px 0 rgba(0,0,0,0.02)",
+                }}
+              >
+                <div style={{ fontWeight: 800, marginBottom: 8 }}>{card.title}</div>
+                <div style={{ fontSize: 13, lineHeight: 1.55, color: "#516371" }}>{card.description}</div>
+              </a>
+            ))}
+          </div>
+        </section>
       )}
       {RootPage({ config, params, searchParams, importMap })}
     </>
