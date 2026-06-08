@@ -27,9 +27,9 @@ const mediaUpload = isVercel && !hasR2Storage
       staticDir: isVercel ? undefined : "public/media",
       imageSizes: [
         // Width-only resizing keeps the original aspect ratio and avoids forced cropping.
-        { name: "thumb", width: 400 },
-        { name: "card", width: 800 },
-        { name: "hero", width: 1920 }
+        { name: "thumb", width: 400, withoutEnlargement: true },
+        { name: "card", width: 800, withoutEnlargement: true },
+        { name: "hero", width: 1920, withoutEnlargement: true }
       ],
       adminThumbnail: "thumb",
       mimeTypes: ["image/*"],
