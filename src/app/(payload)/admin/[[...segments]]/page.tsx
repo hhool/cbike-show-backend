@@ -26,6 +26,14 @@ type StatCard = {
   tone: ShortcutCard["tone"];
 };
 
+type TaskCard = {
+  label: string;
+  value: string;
+  hint: string;
+  href: string;
+  tone: ShortcutCard["tone"];
+};
+
 const shortcutCards: ShortcutCard[] = [
   {
     title: "评测编辑 Review Editing",
@@ -87,6 +95,20 @@ function statStyle(tone: ShortcutCard["tone"]): React.CSSProperties {
   };
 }
 
+function taskStyle(tone: ShortcutCard["tone"]): React.CSSProperties {
+  return {
+    ...cardStyle(tone),
+    border: "1px solid",
+    borderRadius: 14,
+    padding: 14,
+    color: "#18313f",
+    boxShadow: "0 1px 0 rgba(0,0,0,0.02)",
+    minHeight: 94,
+    display: "block",
+    textDecoration: "none",
+  };
+}
+
 export const generateMetadata = ({ params, searchParams }: Args): Promise<Metadata> =>
   generatePageMetadata({ config, params, searchParams });
 
@@ -118,15 +140,24 @@ export default async function Page({ params, searchParams }: Args) {
 
   const reviewDocs = reviewsResult.docs.length;
   const publishedReviews = reviewsResult.docs.filter((doc: any) => doc?.status === "published").length;
+  const pendingReviews = reviewsResult.docs.filter((doc: any) => doc?.status && doc.status !== "published" && doc.status !== "archived").length;
   const productDocs = productsResult.docs.length;
+  const productsMissingSummary = productsResult.docs.filter((doc: any) => !String(doc?.summary ?? "").trim()).length;
   const localeDocs = localeResult.docs.length;
   const categoryDocs = categoriesResult.docs.length;
+  const categoriesMissingAgeRange = categoriesResult.docs.filter((doc: any) => !String(doc?.ageRange ?? "").trim()).length;
 
   const stats: StatCard[] = [
     { label: "评测总数 Reviews", value: String(reviewDocs), hint: `${publishedReviews} 已发布`, tone: "primary" },
     { label: "产品总数 Products", value: String(productDocs), hint: "目录主数据", tone: "amber" },
     { label: "词条总数 Locale Entries", value: String(localeDocs), hint: "多语言运营", tone: "mint" },
     { label: "品类总数 Categories", value: String(categoryDocs), hint: "分类结构", tone: "slate" }
+  ];
+
+  const tasks: TaskCard[] = [
+    { label: "待发布评测", value: String(pendingReviews), hint: "草稿 / 待合规 / 待主编", href: "/admin/collections/reviews", tone: "primary" },
+    { label: "待补摘要产品", value: String(productsMissingSummary), hint: "产品摘要为空", href: "/admin/collections/products", tone: "amber" },
+    { label: "待补年龄段品类", value: String(categoriesMissingAgeRange), hint: "品类年龄段为空", href: "/admin/collections/categories", tone: "slate" }
   ];
 
   return (
@@ -168,6 +199,25 @@ export default async function Page({ params, searchParams }: Args) {
                 <div style={{ marginTop: 8, fontSize: 12, color: "#60717d" }}>{stat.hint}</div>
               </div>
             ))}
+          </div>
+
+          <div style={{ marginTop: 16 }}>
+            <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, flexWrap: "wrap", marginBottom: 10 }}>
+              <div>
+                <h3 style={{ margin: 0, fontSize: 16, color: "#163a57" }}>待处理任务</h3>
+                <p style={{ margin: "6px 0 0", color: "#55646d", fontSize: 13 }}>这些内容优先处理，能最快改善前台数据完整度。</p>
+              </div>
+            </div>
+
+            <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12 }}>
+              {tasks.map((task) => (
+                <a key={task.label} href={task.href} style={taskStyle(task.tone)}>
+                  <div style={{ fontSize: 13, color: "#5a6a75", marginBottom: 8 }}>{task.label}</div>
+                  <div style={{ fontSize: 30, fontWeight: 900, lineHeight: 1, color: "#123047" }}>{task.value}</div>
+                  <div style={{ marginTop: 8, fontSize: 12, color: "#60717d" }}>{task.hint}</div>
+                </a>
+              ))}
+            </div>
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12, marginTop: 14 }}>
