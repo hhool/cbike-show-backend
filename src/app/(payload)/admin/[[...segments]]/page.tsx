@@ -95,17 +95,21 @@ function statStyle(tone: ShortcutCard["tone"]): React.CSSProperties {
   };
 }
 
-function taskStyle(tone: ShortcutCard["tone"]): React.CSSProperties {
+function taskStyle(tone: ShortcutCard["tone"], active: boolean): React.CSSProperties {
+  const base = cardStyle(tone);
   return {
-    ...cardStyle(tone),
+    ...base,
     border: "1px solid",
     borderRadius: 14,
     padding: 14,
     color: "#18313f",
-    boxShadow: "0 1px 0 rgba(0,0,0,0.02)",
+    boxShadow: active ? "0 0 0 2px rgba(29, 91, 136, 0.16), 0 1px 0 rgba(0,0,0,0.03)" : "0 1px 0 rgba(0,0,0,0.02)",
     minHeight: 94,
     display: "block",
     textDecoration: "none",
+    opacity: active ? 1 : 0.68,
+    transform: active ? "translateY(-1px)" : "none",
+    transition: "all 120ms ease",
   };
 }
 
@@ -217,9 +221,26 @@ export default async function Page({ params, searchParams }: Args) {
 
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12 }}>
               {tasks.map((task) => (
-                <a key={task.label} href={task.href} style={taskStyle(task.tone)}>
+                <a key={task.label} href={task.href} style={taskStyle(task.tone, Number(task.value) > 0)}>
                   <div style={{ fontSize: 13, color: "#5a6a75", marginBottom: 8 }}>{task.label}</div>
-                  <div style={{ fontSize: 30, fontWeight: 900, lineHeight: 1, color: "#123047" }}>{task.value}</div>
+                  <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
+                    <div style={{ fontSize: 30, fontWeight: 900, lineHeight: 1, color: "#123047" }}>{task.value}</div>
+                    <span
+                      style={{
+                        fontSize: 11,
+                        fontWeight: 800,
+                        letterSpacing: 0.2,
+                        color: Number(task.value) > 0 ? "#0f4a75" : "#718793",
+                        background: Number(task.value) > 0 ? "#e6f1fb" : "#eef2f5",
+                        border: "1px solid",
+                        borderColor: Number(task.value) > 0 ? "#c8dff2" : "#d7e0e6",
+                        borderRadius: 999,
+                        padding: "2px 8px"
+                      }}
+                    >
+                      {Number(task.value) > 0 ? "需处理" : "已清空"}
+                    </span>
+                  </div>
                   <div style={{ marginTop: 8, fontSize: 12, color: "#60717d" }}>{task.hint}</div>
                 </a>
               ))}
