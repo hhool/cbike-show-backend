@@ -220,8 +220,8 @@ export default async function Page({ params, searchParams }: Args) {
                 gap: 8,
               }}
             >
-              <span style={{ fontWeight: 700 }}>后台运营工作台</span>
-              <span style={{ fontSize: 11, color: "var(--theme-text-light, #5b6670)" }}>默认收起，点击展开</span>
+              <span style={{ fontWeight: 700 }}>后台运营工作台 Admin Ops Workspace</span>
+              <span style={{ fontSize: 11, color: "var(--theme-text-light, #5b6670)" }}>默认收起，点击展开 Collapsed by default, click to expand</span>
             </summary>
 
             <div
@@ -232,7 +232,7 @@ export default async function Page({ params, searchParams }: Args) {
             >
               <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
                 <p style={{ margin: "4px 0 0", color: "var(--theme-text-light, #5b6670)", fontSize: 13 }}>
-                  先看待处理内容，再进入集合编辑，减少后台来回跳转。
+                  先看待处理内容，再进入集合编辑，减少后台来回跳转。Review pending items first, then jump into collections.
                 </p>
                 <a
                   href="/i18n/brands"
@@ -242,7 +242,7 @@ export default async function Page({ params, searchParams }: Args) {
                     textDecoration: "none",
                   }}
                 >
-                  快捷入口: 多语言运营页 (Locale Operations)
+                  快捷入口 Quick Access: 多语言运营页 Locale Operations
                 </a>
               </div>
 
@@ -258,8 +258,8 @@ export default async function Page({ params, searchParams }: Args) {
 
               <div style={{ marginTop: 16 }}>
                 <div style={{ marginBottom: 10 }}>
-                  <h3 style={{ margin: 0, fontSize: 16, color: "var(--theme-text, #1f2933)" }}>待处理任务</h3>
-                  <p style={{ margin: "6px 0 0", color: "var(--theme-text-light, #5b6670)", fontSize: 13 }}>这些内容优先处理，能最快改善前台数据完整度。</p>
+                  <h3 style={{ margin: 0, fontSize: 16, color: "var(--theme-text, #1f2933)" }}>待处理任务 Pending Tasks</h3>
+                  <p style={{ margin: "6px 0 0", color: "var(--theme-text-light, #5b6670)", fontSize: 13 }}>这些内容优先处理，能最快改善前台数据完整度。Prioritize these items for quickest frontend quality gains.</p>
                 </div>
 
                 <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12 }}>
@@ -281,7 +281,7 @@ export default async function Page({ params, searchParams }: Args) {
                             padding: "2px 8px"
                           }}
                         >
-                          {Number(task.value) > 0 ? "需处理" : "已清空"}
+                          {Number(task.value) > 0 ? "需处理 Pending" : "已清空 Clear"}
                         </span>
                       </div>
                       <div style={{ marginTop: 8, fontSize: 12, color: "var(--theme-text-light, #5b6670)" }}>{task.hint}</div>
