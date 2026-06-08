@@ -75,10 +75,10 @@ const shortcutCards: ShortcutCard[] = [
 
 function cardStyle(tone: ShortcutCard["tone"]): React.CSSProperties {
   const palette: Record<ShortcutCard["tone"], React.CSSProperties> = {
-    primary: { borderColor: "#cfe1ef", background: "linear-gradient(135deg, #eef7fd 0%, #ffffff 100%)" },
-    mint: { borderColor: "#cfe9df", background: "linear-gradient(135deg, #eefbf6 0%, #ffffff 100%)" },
-    amber: { borderColor: "#f1dec0", background: "linear-gradient(135deg, #fff7ea 0%, #ffffff 100%)" },
-    slate: { borderColor: "#d8e0e8", background: "linear-gradient(135deg, #f6f9fb 0%, #ffffff 100%)" }
+    primary: { borderColor: "var(--theme-elevation-150, #dfe6eb)", background: "var(--theme-elevation-0, #ffffff)" },
+    mint: { borderColor: "var(--theme-elevation-150, #dfe6eb)", background: "var(--theme-elevation-0, #ffffff)" },
+    amber: { borderColor: "var(--theme-elevation-150, #dfe6eb)", background: "var(--theme-elevation-0, #ffffff)" },
+    slate: { borderColor: "var(--theme-elevation-150, #dfe6eb)", background: "var(--theme-elevation-0, #ffffff)" }
   };
   return palette[tone];
 }
@@ -87,10 +87,10 @@ function statStyle(tone: ShortcutCard["tone"]): React.CSSProperties {
   return {
     ...cardStyle(tone),
     border: "1px solid",
-    borderRadius: 14,
+    borderRadius: 8,
     padding: 14,
-    color: "#18313f",
-    boxShadow: "0 1px 0 rgba(0,0,0,0.02)",
+    color: "var(--theme-text, #1f2933)",
+    boxShadow: "none",
     minHeight: 92,
   };
 }
@@ -100,15 +100,16 @@ function taskStyle(tone: ShortcutCard["tone"], active: boolean): React.CSSProper
   return {
     ...base,
     border: "1px solid",
-    borderRadius: 14,
+    borderRadius: 8,
     padding: 14,
-    color: "#18313f",
-    boxShadow: active ? "0 0 0 2px rgba(29, 91, 136, 0.16), 0 1px 0 rgba(0,0,0,0.03)" : "0 1px 0 rgba(0,0,0,0.02)",
+    color: "var(--theme-text, #1f2933)",
+    boxShadow: "none",
+    borderColor: active ? "var(--theme-success-500, #1f7a4d)" : "var(--theme-elevation-150, #dfe6eb)",
     minHeight: 94,
     display: "block",
     textDecoration: "none",
-    opacity: active ? 1 : 0.68,
-    transform: active ? "translateY(-1px)" : "none",
+    opacity: 1,
+    transform: "none",
     transition: "all 120ms ease",
   };
 }
@@ -195,23 +196,23 @@ export default async function Page({ params, searchParams }: Args) {
           style={{
             margin: "12px 16px 0",
             padding: 16,
-            border: "1px solid #d8e3ea",
-            borderRadius: 14,
-            background: "linear-gradient(180deg, #f8fbfd 0%, #ffffff 100%)",
+            border: "1px solid var(--theme-elevation-150, #dfe6eb)",
+            borderRadius: 8,
+            background: "var(--theme-elevation-0, #ffffff)",
           }}
         >
           <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
             <div>
-              <h2 style={{ margin: 0, fontSize: 18, color: "#163a57" }}>后台运营工作台</h2>
-              <p style={{ margin: "6px 0 0", color: "#55646d", fontSize: 13 }}>
+              <h2 style={{ margin: 0, fontSize: 18, color: "var(--theme-text, #1f2933)" }}>后台运营工作台</h2>
+              <p style={{ margin: "6px 0 0", color: "var(--theme-text-light, #5b6670)", fontSize: 13 }}>
                 先看待处理内容，再进入集合编辑，减少后台来回跳转。
               </p>
             </div>
             <a
               href="/i18n/brands"
               style={{
-                color: "#174a74",
-                fontWeight: 700,
+                color: "var(--theme-success-600, #1f7a4d)",
+                fontWeight: 600,
                 textDecoration: "none",
               }}
             >
@@ -222,9 +223,9 @@ export default async function Page({ params, searchParams }: Args) {
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", gap: 12, marginTop: 16 }}>
             {stats.map((stat) => (
               <div key={stat.label} style={statStyle(stat.tone)}>
-                <div style={{ fontSize: 13, color: "#5a6a75", marginBottom: 8 }}>{stat.label}</div>
-                <div style={{ fontSize: 30, fontWeight: 900, lineHeight: 1, color: "#123047" }}>{stat.value}</div>
-                <div style={{ marginTop: 8, fontSize: 12, color: "#60717d" }}>{stat.hint}</div>
+                <div style={{ fontSize: 13, color: "var(--theme-text-light, #5b6670)", marginBottom: 8 }}>{stat.label}</div>
+                <div style={{ fontSize: 30, fontWeight: 800, lineHeight: 1, color: "var(--theme-text, #1f2933)" }}>{stat.value}</div>
+                <div style={{ marginTop: 8, fontSize: 12, color: "var(--theme-text-light, #5b6670)" }}>{stat.hint}</div>
               </div>
             ))}
           </div>
@@ -232,26 +233,26 @@ export default async function Page({ params, searchParams }: Args) {
           <div style={{ marginTop: 16 }}>
             <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, flexWrap: "wrap", marginBottom: 10 }}>
               <div>
-                <h3 style={{ margin: 0, fontSize: 16, color: "#163a57" }}>待处理任务</h3>
-                <p style={{ margin: "6px 0 0", color: "#55646d", fontSize: 13 }}>这些内容优先处理，能最快改善前台数据完整度。</p>
+                <h3 style={{ margin: 0, fontSize: 16, color: "var(--theme-text, #1f2933)" }}>待处理任务</h3>
+                <p style={{ margin: "6px 0 0", color: "var(--theme-text-light, #5b6670)", fontSize: 13 }}>这些内容优先处理，能最快改善前台数据完整度。</p>
               </div>
             </div>
 
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12 }}>
               {tasks.map((task) => (
                 <a key={task.label} href={task.href} style={taskStyle(task.tone, Number(task.value) > 0)}>
-                  <div style={{ fontSize: 13, color: "#5a6a75", marginBottom: 8 }}>{task.label}</div>
+                  <div style={{ fontSize: 13, color: "var(--theme-text-light, #5b6670)", marginBottom: 8 }}>{task.label}</div>
                   <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 8 }}>
-                    <div style={{ fontSize: 30, fontWeight: 900, lineHeight: 1, color: "#123047" }}>{task.value}</div>
+                    <div style={{ fontSize: 30, fontWeight: 800, lineHeight: 1, color: "var(--theme-text, #1f2933)" }}>{task.value}</div>
                     <span
                       style={{
                         fontSize: 11,
-                        fontWeight: 800,
+                        fontWeight: 700,
                         letterSpacing: 0.2,
-                        color: Number(task.value) > 0 ? "#0f4a75" : "#718793",
-                        background: Number(task.value) > 0 ? "#e6f1fb" : "#eef2f5",
+                        color: Number(task.value) > 0 ? "var(--theme-success-700, #145a39)" : "var(--theme-text-light, #5b6670)",
+                        background: Number(task.value) > 0 ? "var(--theme-success-100, #eaf6ef)" : "var(--theme-elevation-50, #f6f8fa)",
                         border: "1px solid",
-                        borderColor: Number(task.value) > 0 ? "#c8dff2" : "#d7e0e6",
+                        borderColor: Number(task.value) > 0 ? "var(--theme-success-200, #cfe8d9)" : "var(--theme-elevation-150, #dfe6eb)",
                         borderRadius: 999,
                         padding: "2px 8px"
                       }}
@@ -259,7 +260,7 @@ export default async function Page({ params, searchParams }: Args) {
                       {Number(task.value) > 0 ? "需处理" : "已清空"}
                     </span>
                   </div>
-                  <div style={{ marginTop: 8, fontSize: 12, color: "#60717d" }}>{task.hint}</div>
+                  <div style={{ marginTop: 8, fontSize: 12, color: "var(--theme-text-light, #5b6670)" }}>{task.hint}</div>
                 </a>
               ))}
             </div>
@@ -273,15 +274,15 @@ export default async function Page({ params, searchParams }: Args) {
                 style={{
                   ...cardStyle(card.tone),
                   border: "1px solid",
-                  borderRadius: 14,
+                  borderRadius: 8,
                   padding: 14,
-                  color: "#18313f",
+                  color: "var(--theme-text, #1f2933)",
                   textDecoration: "none",
-                  boxShadow: "0 1px 0 rgba(0,0,0,0.02)",
+                  boxShadow: "none",
                 }}
               >
                 <div style={{ fontWeight: 800, marginBottom: 8 }}>{card.title}</div>
-                <div style={{ fontSize: 13, lineHeight: 1.55, color: "#516371" }}>{card.description}</div>
+                <div style={{ fontSize: 13, lineHeight: 1.55, color: "var(--theme-text-light, #5b6670)" }}>{card.description}</div>
               </a>
             ))}
           </div>
