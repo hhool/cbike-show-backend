@@ -194,11 +194,10 @@ export default async function Page({ params, searchParams }: Args) {
       {isDashboardRoot && (
         <section
           style={{
-            position: "fixed",
+            position: "sticky",
             top: 58,
-            left: 16,
-            right: 16,
-            zIndex: 20,
+            margin: "12px 16px 0",
+            zIndex: 8,
           }}
         >
           <details
@@ -315,7 +314,6 @@ export default async function Page({ params, searchParams }: Args) {
           </details>
         </section>
       )}
-      {isDashboardRoot && <div style={{ height: 56 }} />}
       {RootPage({ config, params, searchParams, importMap })}
     </>
   );
