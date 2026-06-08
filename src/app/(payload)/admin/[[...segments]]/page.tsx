@@ -210,14 +210,23 @@ export default async function Page({ params, searchParams }: Args) {
                 cursor: "pointer",
                 padding: "12px 16px",
                 color: "var(--theme-text, #1f2933)",
-                fontWeight: 700,
                 fontSize: 14,
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                gap: 8,
               }}
             >
-              后台运营工作台
+              <span style={{ fontWeight: 700 }}>后台运营工作台</span>
+              <span style={{ fontSize: 12, color: "var(--theme-text-light, #5b6670)" }}>默认收起，点击展开</span>
             </summary>
 
-            <div style={{ padding: "0 16px 16px" }}>
+            <div
+              style={{
+                padding: "10px 16px 16px",
+                borderTop: "1px solid var(--theme-elevation-100, #e8edf1)",
+              }}
+            >
               <div style={{ display: "flex", alignItems: "baseline", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
                 <p style={{ margin: "4px 0 0", color: "var(--theme-text-light, #5b6670)", fontSize: 13 }}>
                   先看待处理内容，再进入集合编辑，减少后台来回跳转。
