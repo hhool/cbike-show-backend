@@ -195,7 +195,7 @@ export default async function Page({ params, searchParams }: Args) {
         <section
           style={{
             position: "sticky",
-            top: 58,
+            top: 0,
             margin: "12px 16px 0",
             zIndex: 8,
           }}
