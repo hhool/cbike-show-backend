@@ -191,11 +191,10 @@ export default async function Page({ params, searchParams }: Args) {
 
   return (
     <>
-      {RootPage({ config, params, searchParams, importMap })}
       {isDashboardRoot && (
         <section
           style={{
-            margin: "0 16px 16px",
+            margin: "12px 16px 0",
           }}
         >
           <details
@@ -311,6 +310,7 @@ export default async function Page({ params, searchParams }: Args) {
           </details>
         </section>
       )}
+      {RootPage({ config, params, searchParams, importMap })}
     </>
   );
 }
