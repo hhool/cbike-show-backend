@@ -2,7 +2,7 @@ import Link from "next/link";
 import { getLocaleEntryMap, getSitePageBySlug, pickLocale } from "../lib/cms";
 
 type ProductsPageProps = {
-  searchParams?: Promise<{ lang?: string; q?: string; region?: string; brand?: string }>;
+  searchParams?: Promise<{ lang?: string; q?: string; region?: string; brand?: string; category?: string }>;
 };
 
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
@@ -11,6 +11,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
   const q = (params.q || "").trim();
   const region = (params.region || "").trim();
   const brandSlug = (params.brand || "").trim();
+  const categorySlug = (params.category || "").trim();
 
   const { payload, page } = await getSitePageBySlug("products", locale);
 
@@ -39,6 +40,19 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
     selectedBrand = selectedBrandResult.docs[0] || null;
   }
 
+  let selectedCategory: any = null;
+  if (categorySlug) {
+    const selectedCategoryResult = await payload.find({
+      collection: "categories",
+      limit: 1,
+      pagination: false,
+      locale,
+      where: { slug: { equals: categorySlug } },
+      depth: 0,
+    });
+    selectedCategory = selectedCategoryResult.docs[0] || null;
+  }
+
   const whereClause: Record<string, unknown> = {
     _status: {
       equals: "published",
@@ -59,6 +73,9 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
     whereClause.brand = selectedBrand && typeof selectedBrand.id === "number" ? { equals: selectedBrand.id } : { equals: -1 };
   } else if (region) {
     whereClause.brand = brandIdsByRegion.length > 0 ? { in: brandIdsByRegion } : { equals: -1 };
+  }
+  if (categorySlug) {
+    whereClause.category = selectedCategory && typeof selectedCategory.id === "number" ? { equals: selectedCategory.id } : { equals: -1 };
   }
 
   const quickBrandsResult = await payload.find({
@@ -94,6 +111,10 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
       "products.filter.regionNA",
       "products.filter.searchNuna",
       "products.filter.brandLabel",
+      "products.filter.categoryLabel",
+      "products.filter.categoryLightweight",
+      "products.filter.categoryElectricToyCar",
+      "products.filter.selectedCategory",
       "products.switchTo",
       "products.empty",
       "products.viewDetail",
@@ -123,12 +144,27 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
           {localeMap["products.filter.searchNuna"] || (locale === "en" ? "Search Nuna" : "检索 Nuna")}
         </Link>
         <span style={{ color: "#6a7a85" }}>
+          {localeMap["products.filter.categoryLabel"] || (locale === "en" ? "Category:" : "品类:")}
+        </span>
+        <Link
+          href={`/products?lang=${locale}${region ? `&region=${region}` : ""}${q ? `&q=${encodeURIComponent(q)}` : ""}${brandSlug ? `&brand=${brandSlug}` : ""}&category=stroller-lightweight`}
+          style={{ color: "#1c5b88", textDecoration: "none" }}
+        >
+          {localeMap["products.filter.categoryLightweight"] || (locale === "en" ? "Lightweight Stroller" : "轻便婴儿推车")}
+        </Link>
+        <Link
+          href={`/products?lang=${locale}${region ? `&region=${region}` : ""}${q ? `&q=${encodeURIComponent(q)}` : ""}${brandSlug ? `&brand=${brandSlug}` : ""}&category=kids-electric-toy-car`}
+          style={{ color: "#1c5b88", textDecoration: "none" }}
+        >
+          {localeMap["products.filter.categoryElectricToyCar"] || (locale === "en" ? "Kids Electric Ride-on Car" : "儿童电动玩具车")}
+        </Link>
+        <span style={{ color: "#6a7a85" }}>
           {localeMap["products.filter.brandLabel"] || (locale === "en" ? "Brand:" : "品牌:")}
         </span>
         {quickBrandsResult.docs.map((brand: any) => (
           <Link
             key={brand.id}
-            href={`/products?lang=${locale}${region ? `&region=${region}` : ""}${q ? `&q=${encodeURIComponent(q)}` : ""}&brand=${brand.slug}`}
+            href={`/products?lang=${locale}${region ? `&region=${region}` : ""}${q ? `&q=${encodeURIComponent(q)}` : ""}${categorySlug ? `&category=${categorySlug}` : ""}&brand=${brand.slug}`}
             style={{ color: "#1c5b88", textDecoration: "none" }}
           >
             {brand.name || "-"}
@@ -137,6 +173,11 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
         {selectedBrand?.name && (
           <span style={{ color: "#4f5f67" }}>
             {locale === "en" ? "Selected" : "已选"}: <strong>{selectedBrand.name}</strong>
+          </span>
+        )}
+        {selectedCategory?.name && (
+          <span style={{ color: "#4f5f67" }}>
+            {localeMap["products.filter.selectedCategory"] || (locale === "en" ? "Category" : "品类")}: <strong>{selectedCategory.name}</strong>
           </span>
         )}
       </section>

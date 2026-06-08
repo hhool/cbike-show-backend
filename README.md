@@ -53,13 +53,26 @@ npm run build
 npm run start
 ```
 
+Important runtime note:
+
+- Do not run `npm run build` while `npm run dev` is running in the same workspace. `build` clears `.next`, which can break the active dev server and cause temporary 500 errors.
+- If this happens, stop dev, run `rm -rf .next`, then start dev again.
+
 ## Seed Data
 
 The seed script populates baseline brands, products, reviews, pages, and locale entries.
 
 ```bash
-API_BASE=http://localhost:3000 npx tsx scripts/seed.ts
+npx tsx scripts/seed.ts
 ```
+
+`scripts/seed.ts` auto-detects a healthy local API base in this order:
+
+- `API_BASE` (if explicitly provided)
+- `http://localhost:3000`
+- `http://localhost:3001`
+
+If your dev server is running on a non-default port, set `API_BASE` explicitly.
 
 Optional admin credentials for seed login:
 
@@ -95,7 +108,7 @@ Production database notes:
 - `/` Home
 - `/brands` Brand listing
 - `/brands/[slug]` Brand detail (includes famous products and latest 2026 products sections)
-- `/products` Product listing (supports `q`, `region`, `brand` filters)
+- `/products` Product listing (supports `q`, `region`, `brand`, `category` filters)
 - `/products/[slug]` Product detail
 - `/reviews` Review listing
 - `/reviews/[slug]` Review detail

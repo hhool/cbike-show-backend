@@ -52,6 +52,7 @@ export default async function BrandDetailPage({ params, searchParams }: BrandDet
       "brands.detail.marketFocus.balance_bike",
       "brands.detail.marketFocus.scooter",
       "brands.detail.marketFocus.bicycle",
+      "brands.detail.marketFocus.electric_toy_car",
     ],
     locale,
   );
@@ -143,6 +144,7 @@ export default async function BrandDetailPage({ params, searchParams }: BrandDet
     balance_bike: localeMap["brands.detail.marketFocus.balance_bike"] || (locale === "en" ? "Balance Bike" : "平衡车"),
     scooter: localeMap["brands.detail.marketFocus.scooter"] || (locale === "en" ? "Scooter" : "滑板车"),
     bicycle: localeMap["brands.detail.marketFocus.bicycle"] || (locale === "en" ? "Bicycle" : "自行车"),
+    electric_toy_car: localeMap["brands.detail.marketFocus.electric_toy_car"] || (locale === "en" ? "Kids Electric Ride-on Car" : "儿童电动玩具车"),
   };
 
   return (

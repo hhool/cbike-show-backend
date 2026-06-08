@@ -12,6 +12,25 @@ npx payload generate:importmap   # 生成 src/app/(payload)/admin/importMap.js
 npm run dev                       # http://localhost:3000
 ```
 
+## 运行稳定性说明
+
+- 不要在同一工作区里让 `npm run dev` 与 `npm run build` 并行运行。`build` 会清理 `.next`，可能导致正在运行的 dev 服务短时 500。
+- 若已发生：先停止 dev，执行 `rm -rf .next`，再重新启动 dev。
+
+## Seed 说明
+
+```bash
+npx tsx scripts/seed.ts
+```
+
+`scripts/seed.ts` 会自动探测本地可用 API 地址，顺序如下：
+
+- 显式设置的 `API_BASE`
+- `http://localhost:3000`
+- `http://localhost:3001`
+
+如果你的 dev 端口不是默认值，请显式设置 `API_BASE`。
+
 首次访问 [http://localhost:3000/admin](http://localhost:3000/admin) 会引导创建第一个超级管理员账号。
 
 ## 目录速览
@@ -20,6 +39,10 @@ npm run dev                       # http://localhost:3000
 - `src/payload/collections/` — Users / Members / Media / Brands / Categories / Products / Reviews
 - `src/app/(payload)/` — Payload Admin + REST API 路由
 - `src/app/page.tsx` — 临时前台首页占位
+
+## 前台路由补充
+
+- `/products` 支持筛选参数：`q`、`region`、`brand`、`category`
 
 ## 设计文档
 

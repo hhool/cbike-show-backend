@@ -3,9 +3,15 @@
  * Run:
  *   export PATH=/tmp/node-v22.18.0-darwin-x64/bin:$PATH
  *   API_BASE=http://localhost:3000 npx tsx scripts/seed.ts
+ *
+ * If API_BASE is not set, the script auto-detects a healthy local dev endpoint
+ * from http://localhost:3000 and http://localhost:3001.
  */
 
-const API_BASE = process.env.API_BASE || "http://localhost:3000";
+const API_BASE_CANDIDATES = process.env.API_BASE
+  ? [process.env.API_BASE]
+  : ["http://localhost:3000", "http://localhost:3001"];
+let ACTIVE_API_BASE = API_BASE_CANDIDATES[0];
 const ADMIN_EMAIL = process.env.SEED_ADMIN_EMAIL || "admin@cbike-lab.example";
 const ADMIN_PASSWORD = process.env.SEED_ADMIN_PASSWORD || "Admin@2026!";
 
@@ -49,13 +55,39 @@ async function request(path: string, init?: RequestInit, token?: string): Promis
   };
   if (token) headers.Authorization = `JWT ${token}`;
 
-  const res = await fetch(`${API_BASE}${path}`, { ...init, headers });
+  const res = await fetch(`${ACTIVE_API_BASE}${path}`, { ...init, headers });
   const json = await res.json().catch(() => ({}));
   if (!res.ok) {
     const msg = json?.errors?.[0]?.message || json?.message || `HTTP ${res.status}`;
     throw new Error(`${path} -> ${msg}`);
   }
   return json;
+}
+
+async function resolveApiBase(): Promise<void> {
+  for (const base of API_BASE_CANDIDATES) {
+    try {
+      const res = await fetch(`${base}/api/users/login`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          email: "healthcheck@invalid.local",
+          password: "invalid",
+        }),
+      });
+      if (res.status !== 404 && res.status < 500) {
+        ACTIVE_API_BASE = base;
+        console.log(`Seed API base: ${ACTIVE_API_BASE}`);
+        return;
+      }
+    } catch {
+      // Try next candidate when endpoint is unreachable.
+    }
+  }
+
+  throw new Error(`No healthy API base found. Checked: ${API_BASE_CANDIDATES.join(", ")}`);
 }
 
 function unwrapDoc<T extends AnyObject>(payload: T): AnyObject {
@@ -277,6 +309,34 @@ async function upsertLocaleEntries(token: string): Promise<void> {
       valueZh: "品牌:",
       valueEn: "Brand:",
       description: "Products filter brand label.",
+    },
+    {
+      namespace: "products",
+      key: "products.filter.categoryLabel",
+      valueZh: "品类:",
+      valueEn: "Category:",
+      description: "Products filter category label.",
+    },
+    {
+      namespace: "products",
+      key: "products.filter.categoryLightweight",
+      valueZh: "轻便婴儿推车",
+      valueEn: "Lightweight Stroller",
+      description: "Products filter lightweight stroller shortcut label.",
+    },
+    {
+      namespace: "products",
+      key: "products.filter.categoryElectricToyCar",
+      valueZh: "儿童电动玩具车",
+      valueEn: "Kids Electric Ride-on Car",
+      description: "Products filter kids electric ride-on car shortcut label.",
+    },
+    {
+      namespace: "products",
+      key: "products.filter.selectedCategory",
+      valueZh: "品类",
+      valueEn: "Category",
+      description: "Products filter selected category label.",
     },
     {
       namespace: "products",
@@ -574,6 +634,13 @@ async function upsertLocaleEntries(token: string): Promise<void> {
     },
     {
       namespace: "brands",
+      key: "brands.detail.marketFocus.electric_toy_car",
+      valueZh: "儿童电动玩具车",
+      valueEn: "Kids Electric Ride-on Car",
+      description: "Brand detail market focus kids electric ride-on car label.",
+    },
+    {
+      namespace: "brands",
       key: "brands.region.back",
       valueZh: "返回品牌分组",
       valueEn: "Back to brand groups",
@@ -615,6 +682,7 @@ async function upsertLocaleEntries(token: string): Promise<void> {
 }
 
 async function main() {
+  await resolveApiBase();
   const token = await ensureAdminToken();
 
   const topBrandMap = new Map<string, AnyObject>();
@@ -648,6 +716,39 @@ async function main() {
     );
     console.log(`Category created id=${category.id}`);
   }
+
+  let electricToyCarCategory = await findBySlug("categories", "kids-electric-toy-car", token);
+  if (!electricToyCarCategory) {
+    electricToyCarCategory = unwrapDoc(
+      await request(
+        "/api/categories",
+        {
+          method: "POST",
+          body: JSON.stringify({
+            name: "儿童电动玩具车",
+            slug: "kids-electric-toy-car",
+            kind: "electric_toy_car",
+            ageRange: "3-8y",
+          }),
+        },
+        token,
+      ),
+    );
+    console.log(`Kids electric toy car category created id=${electricToyCarCategory.id}`);
+  }
+
+  await request(
+    `/api/categories/${electricToyCarCategory.id}?locale=zh`,
+    {
+      method: "PATCH",
+      body: JSON.stringify({
+        name: "儿童电动玩具车",
+        kind: "electric_toy_car",
+        ageRange: "3-8y",
+      }),
+    },
+    token,
+  );
 
   let product = await findBySlug("products", "nuna-trvl-lx-2026", token);
   if (!product) {

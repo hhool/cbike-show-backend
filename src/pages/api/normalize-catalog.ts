@@ -21,6 +21,7 @@ const parseMaybeJSON = (value: unknown): Record<string, unknown> | null => {
 const fallbackBySlug = (slug: string) => {
   if (slug === 'carseat') return { zh: '安全座椅', en: 'Car Seat' };
   if (slug === 'stroller-lightweight') return { zh: '轻便婴儿推车', en: 'Lightweight Stroller' };
+  if (slug === 'kids-electric-toy-car') return { zh: '儿童电动玩具车', en: 'Kids Electric Ride-on Car' };
   return { zh: '婴儿推车', en: 'Stroller' };
 };
 

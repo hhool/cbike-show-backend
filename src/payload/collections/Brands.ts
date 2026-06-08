@@ -33,7 +33,13 @@ export const Brands: CollectionConfig = {
         { label: "婴儿推车（Stroller）", value: "stroller" },
         { label: "平衡车（Balance Bike）", value: "balance_bike" },
         { label: "滑板车（Scooter）", value: "scooter" },
-        { label: "自行车（Bicycle）", value: "bicycle" }
+        { label: "自行车（Bicycle）", value: "bicycle" },
+        { label: "三轮车（Tricycle）", value: "tricycle" },
+        { label: "电动车（Electric Bike）", value: "electric_bike" },
+        { label: "滑行车（Ride-on Toy）", value: "ride_on_toy" },
+        { label: "儿童电动玩具车（Kids Electric Ride-on Car）", value: "electric_toy_car" },
+        { label: "学步车（Walker）", value: "walker" },
+        { label: "多功能车（Multi-functional Bike）", value: "multi_functional_bike" }
       ]
     },
     {
