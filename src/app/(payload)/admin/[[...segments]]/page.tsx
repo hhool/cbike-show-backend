@@ -19,6 +19,13 @@ type ShortcutCard = {
   tone: "primary" | "mint" | "amber" | "slate";
 };
 
+type StatCard = {
+  label: string;
+  value: string;
+  hint: string;
+  tone: ShortcutCard["tone"];
+};
+
 const shortcutCards: ShortcutCard[] = [
   {
     title: "评测编辑 Review Editing",
@@ -68,6 +75,18 @@ function cardStyle(tone: ShortcutCard["tone"]): React.CSSProperties {
   return palette[tone];
 }
 
+function statStyle(tone: ShortcutCard["tone"]): React.CSSProperties {
+  return {
+    ...cardStyle(tone),
+    border: "1px solid",
+    borderRadius: 14,
+    padding: 14,
+    color: "#18313f",
+    boxShadow: "0 1px 0 rgba(0,0,0,0.02)",
+    minHeight: 92,
+  };
+}
+
 export const generateMetadata = ({ params, searchParams }: Args): Promise<Metadata> =>
   generatePageMetadata({ config, params, searchParams });
 
@@ -88,6 +107,27 @@ export default async function Page({ params, searchParams }: Args) {
       redirect("/admin/login");
     }
   }
+
+  const payload = await getPayload({ config });
+  const [reviewsResult, productsResult, localeResult, categoriesResult] = await Promise.all([
+    payload.find({ collection: "reviews", depth: 0, limit: 300, pagination: false }),
+    payload.find({ collection: "products", depth: 0, limit: 300, pagination: false }),
+    payload.find({ collection: "locale-entries", depth: 0, limit: 300, pagination: false }),
+    payload.find({ collection: "categories", depth: 0, limit: 300, pagination: false })
+  ]);
+
+  const reviewDocs = reviewsResult.docs.length;
+  const publishedReviews = reviewsResult.docs.filter((doc: any) => doc?.status === "published").length;
+  const productDocs = productsResult.docs.length;
+  const localeDocs = localeResult.docs.length;
+  const categoryDocs = categoriesResult.docs.length;
+
+  const stats: StatCard[] = [
+    { label: "评测总数 Reviews", value: String(reviewDocs), hint: `${publishedReviews} 已发布`, tone: "primary" },
+    { label: "产品总数 Products", value: String(productDocs), hint: "目录主数据", tone: "amber" },
+    { label: "词条总数 Locale Entries", value: String(localeDocs), hint: "多语言运营", tone: "mint" },
+    { label: "品类总数 Categories", value: String(categoryDocs), hint: "分类结构", tone: "slate" }
+  ];
 
   return (
     <>
@@ -118,6 +158,16 @@ export default async function Page({ params, searchParams }: Args) {
             >
               快捷入口: 多语言运营页 (Locale Operations)
             </a>
+          </div>
+
+          <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(170px, 1fr))", gap: 12, marginTop: 16 }}>
+            {stats.map((stat) => (
+              <div key={stat.label} style={statStyle(stat.tone)}>
+                <div style={{ fontSize: 13, color: "#5a6a75", marginBottom: 8 }}>{stat.label}</div>
+                <div style={{ fontSize: 30, fontWeight: 900, lineHeight: 1, color: "#123047" }}>{stat.value}</div>
+                <div style={{ marginTop: 8, fontSize: 12, color: "#60717d" }}>{stat.hint}</div>
+              </div>
+            ))}
           </div>
 
           <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(220px, 1fr))", gap: 12, marginTop: 14 }}>
