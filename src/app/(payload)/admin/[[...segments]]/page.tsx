@@ -194,10 +194,11 @@ export default async function Page({ params, searchParams }: Args) {
       {isDashboardRoot && (
         <section
           style={{
-            margin: "12px 16px 0",
-            position: "sticky",
-            top: 10,
-            zIndex: 8,
+            position: "fixed",
+            top: 64,
+            left: 16,
+            right: 16,
+            zIndex: 20,
           }}
         >
           <details
