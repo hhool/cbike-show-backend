@@ -22,6 +22,8 @@ function sanitizeSections(input: unknown): unknown {
   });
 }
 
+const toSqlText = (value: string): string => `'${value.replace(/'/g, "''")}'`;
+
 export const SitePages: CollectionConfig = {
   slug: "site-pages",
   labels: {
@@ -106,6 +108,51 @@ export const SitePages: CollectionConfig = {
         const next = { ...(data as Record<string, unknown>) };
         next.sections = sanitizeSections(next.sections);
         return next;
+      },
+    ],
+    afterChange: [
+      async ({ doc, previousDoc, req, operation }) => {
+        if (operation !== "update") return doc;
+
+        const prevSections = Array.isArray((previousDoc as any)?.sections)
+          ? ((previousDoc as any).sections as Array<Record<string, unknown>>)
+          : [];
+        const nextSections = Array.isArray((doc as any)?.sections)
+          ? ((doc as any).sections as Array<Record<string, unknown>>)
+          : [];
+
+        if (!prevSections.length || !nextSections.length) return doc;
+
+        const drizzle = (req.payload as any)?.db?.drizzle;
+        if (!drizzle) return doc;
+
+        for (let i = 0; i < Math.min(prevSections.length, nextSections.length); i += 1) {
+          const oldId = String(prevSections[i]?.id ?? "").trim();
+          const newId = String(nextSections[i]?.id ?? "").trim();
+          if (!oldId || !newId || oldId === newId) continue;
+
+          const oldIdSql = toSqlText(oldId);
+          const newIdSql = toSqlText(newId);
+
+          // Preserve localized content when Payload regenerates array row IDs.
+          await drizzle.execute(`
+            INSERT INTO "site_pages_sections_locales" ("_parent_id", "_locale", "heading", "body")
+            SELECT ${newIdSql}, l."_locale", l."heading", l."body"
+            FROM "site_pages_sections_locales" l
+            WHERE l."_parent_id" = ${oldIdSql}
+            ON CONFLICT ("_parent_id", "_locale") DO UPDATE
+            SET
+              "heading" = EXCLUDED."heading",
+              "body" = EXCLUDED."body"
+          `);
+
+          await drizzle.execute(`
+            DELETE FROM "site_pages_sections_locales"
+            WHERE "_parent_id" = ${oldIdSql}
+          `);
+        }
+
+        return doc;
       },
     ],
   },
