@@ -23,6 +23,8 @@ function sanitizeSections(input: unknown): unknown {
 }
 
 const toSqlText = (value: string): string => `'${value.replace(/'/g, "''")}'`;
+const toSqlNullableText = (value: unknown): string =>
+  typeof value === "string" ? toSqlText(value) : "NULL";
 
 export const SitePages: CollectionConfig = {
   slug: "site-pages",
@@ -110,6 +112,40 @@ export const SitePages: CollectionConfig = {
         return next;
       },
     ],
+    beforeChange: [
+      async ({ operation, originalDoc, req, data }) => {
+        if (operation !== "update") return data;
+
+        const originalSections = Array.isArray((originalDoc as any)?.sections)
+          ? ((originalDoc as any).sections as Array<Record<string, unknown>>)
+          : [];
+        if (!originalSections.length) return data;
+
+        const sectionIds = originalSections
+          .map((section) => String(section?.id ?? "").trim())
+          .filter(Boolean);
+        if (!sectionIds.length) return data;
+
+        const drizzle = (req.payload as any)?.db?.drizzle;
+        if (!drizzle) return data;
+
+        const idListSql = sectionIds.map((id) => toSqlText(id)).join(", ");
+        const result = await drizzle.execute(`
+          SELECT "_parent_id", "_locale", "heading", "body"
+          FROM "site_pages_sections_locales"
+          WHERE "_parent_id" IN (${idListSql})
+        `);
+
+        const rows = Array.isArray((result as { rows?: unknown }).rows)
+          ? ((result as { rows?: unknown }).rows as Array<Record<string, unknown>>)
+          : [];
+
+        const ctx = ((req as any).context ??= {} as Record<string, unknown>);
+        ctx.sitePagesSectionLocaleSnapshot = rows;
+
+        return data;
+      },
+    ],
     afterChange: [
       async ({ doc, previousDoc, req, operation }) => {
         if (operation !== "update") return doc;
@@ -126,6 +162,11 @@ export const SitePages: CollectionConfig = {
         const drizzle = (req.payload as any)?.db?.drizzle;
         if (!drizzle) return doc;
 
+        const currentLocale = typeof (req as any)?.locale === "string" ? (req as any).locale : "";
+        const snapshotRows = Array.isArray((req as any)?.context?.sitePagesSectionLocaleSnapshot)
+          ? ((req as any).context.sitePagesSectionLocaleSnapshot as Array<Record<string, unknown>>)
+          : [];
+
         for (let i = 0; i < Math.min(prevSections.length, nextSections.length); i += 1) {
           const oldId = String(prevSections[i]?.id ?? "").trim();
           const newId = String(nextSections[i]?.id ?? "").trim();
@@ -134,17 +175,26 @@ export const SitePages: CollectionConfig = {
           const oldIdSql = toSqlText(oldId);
           const newIdSql = toSqlText(newId);
 
-          // Preserve localized content when Payload regenerates array row IDs.
-          await drizzle.execute(`
-            INSERT INTO "site_pages_sections_locales" ("_parent_id", "_locale", "heading", "body")
-            SELECT ${newIdSql}, l."_locale", l."heading", l."body"
-            FROM "site_pages_sections_locales" l
-            WHERE l."_parent_id" = ${oldIdSql}
-            ON CONFLICT ("_parent_id", "_locale") DO UPDATE
-            SET
-              "heading" = EXCLUDED."heading",
-              "body" = EXCLUDED."body"
-          `);
+          const rowsToRestore = snapshotRows.filter((row) => {
+            const parentId = String(row?._parent_id ?? "").trim();
+            const locale = String(row?._locale ?? "").trim();
+            return parentId === oldId && locale && locale !== currentLocale;
+          });
+
+          for (const row of rowsToRestore) {
+            const localeSql = toSqlText(String(row._locale));
+            const headingSql = toSqlNullableText(row.heading);
+            const bodySql = toSqlNullableText(row.body);
+
+            await drizzle.execute(`
+              INSERT INTO "site_pages_sections_locales" ("_parent_id", "_locale", "heading", "body")
+              VALUES (${newIdSql}, ${localeSql}, ${headingSql}, ${bodySql})
+              ON CONFLICT ("_parent_id", "_locale") DO UPDATE
+              SET
+                "heading" = EXCLUDED."heading",
+                "body" = EXCLUDED."body"
+            `);
+          }
 
           await drizzle.execute(`
             DELETE FROM "site_pages_sections_locales"
