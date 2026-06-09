@@ -230,6 +230,8 @@ export default async function Page({ params, searchParams }: Args) {
   let currentStatus: string | null = null;
   let statusRiskZh = "";
   let statusRiskEn = "";
+  let publishPrecheckZh = "";
+  let publishPrecheckEn = "";
   if (isReviewEdit) {
     const reviewId = segments[2];
     const [zhDoc, enDoc] = await Promise.all([
@@ -267,6 +269,22 @@ export default async function Page({ params, searchParams }: Args) {
     } else if (currentStatus === "chief" && (!zhComplete || !enComplete)) {
       statusRiskZh = "提示：当前为 chief，但双语尚未补齐，建议先回补再发布。";
       statusRiskEn = "Notice: status is chief but bilingual copy is incomplete; complete content before publish.";
+    }
+
+    const precheckMissing: string[] = [];
+    if (zhMissingField) precheckMissing.push(`中文 zh[${zhMissingField}]`);
+    if (enMissingField) precheckMissing.push(`英文 en[${enMissingField}]`);
+    if (precheckMissing.length > 0) {
+      publishPrecheckZh = `发布前预检：若当前保存为 published，将被阻断。缺失项：${precheckMissing.join("，")}。`;
+      publishPrecheckEn = `Pre-publish check: saving as published would be blocked. Missing: ${[
+        zhMissingField ? `zh[${zhMissingField}]` : null,
+        enMissingField ? `en[${enMissingField}]` : null,
+      ]
+        .filter(Boolean)
+        .join(", ")}.`;
+    } else {
+      publishPrecheckZh = "发布前预检：双语字段完整，可进入 published。";
+      publishPrecheckEn = "Pre-publish check: bilingual fields are complete and ready for published.";
     }
   }
 
@@ -444,6 +462,11 @@ export default async function Page({ params, searchParams }: Args) {
               {statusRiskZh && (
                 <span style={{ color: "var(--theme-warning-800, #8a5a14)", fontWeight: 700 }}>
                   {statusRiskZh} {statusRiskEn}
+                </span>
+              )}
+              {publishPrecheckZh && (
+                <span style={{ color: "var(--theme-text, #1f2933)", fontWeight: 700 }}>
+                  {publishPrecheckZh} {publishPrecheckEn}
                 </span>
               )}
             </div>
