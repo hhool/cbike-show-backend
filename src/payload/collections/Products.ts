@@ -9,7 +9,10 @@ export const Products: CollectionConfig = {
     defaultColumns: ["modelName", "brand", "category", "msrpCNY", "score", "updatedAt"],
     description: "产品主数据建议先补齐品牌、品类、价格、参数和摘要，再关注评分与锁定状态。"
   },
-  access: { read: () => true },
+  access: {
+    read: () => true,
+    readVersions: () => true,
+  },
   versions: { drafts: true },
   fields: [
     { name: "modelName", type: "text", required: true, label: { en: "Model", zh: "型号" }, admin: { description: "前台展示的主型号名称。" } },

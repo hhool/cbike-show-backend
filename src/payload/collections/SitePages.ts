@@ -11,7 +11,10 @@ export const SitePages: CollectionConfig = {
     group: { en: "Content", zh: "内容编辑" },
     defaultColumns: ["slug", "updatedAt"]
   },
-  access: { read: () => true },
+  access: {
+    read: () => true,
+    readVersions: () => true,
+  },
   versions: { drafts: true },
   fields: [
     {

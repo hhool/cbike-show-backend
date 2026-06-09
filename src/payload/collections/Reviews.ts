@@ -73,7 +73,10 @@ export const Reviews: CollectionConfig = {
     defaultColumns: ["title", "type", "status", "scoreOverall", "publishedAt"],
     description: "评测内容建议按当前 locale 单独填写，不要把中文和英文混写在同一个字段里。"
   },
-  access: { read: () => true },
+  access: {
+    read: () => true,
+    readVersions: () => true,
+  },
   versions: { drafts: true },
   fields: [
     {
