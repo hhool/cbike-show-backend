@@ -41,6 +41,10 @@ if (isProduction && (isVercel || isRender) && databaseURL.startsWith("file:")) {
   );
 }
 
+const shouldAutoPushSchema =
+  process.env.DB_SCHEMA_PUSH === "true" ||
+  ((isVercel || isRender) && isProduction && process.env.DB_SCHEMA_PUSH !== "false");
+
 const hasSmtp = Boolean(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
 const hasR2Storage = Boolean(
   process.env.R2_BUCKET_NAME &&
@@ -103,7 +107,10 @@ const allowedOrigins = Array.from(new Set([...localOrigins, ...configuredOrigins
 
 const dbAdapter = databaseURL.startsWith("file:")
   ? sqliteAdapter({ client: { url: databaseURL } })
-  : postgresAdapter({ pool: { connectionString: databaseURL } });
+  : postgresAdapter({
+      pool: { connectionString: databaseURL },
+      push: shouldAutoPushSchema,
+    });
 
 const storagePlugins = hasR2Storage
   ? [
