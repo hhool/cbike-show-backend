@@ -5,6 +5,12 @@ function sanitizeSections(input: unknown): unknown {
   return input.map((item) => {
     if (!item || typeof item !== "object") return item;
     const section = { ...(item as Record<string, unknown>) };
+    // Payload array rows are reconciled by _id in updates.
+    // Admin payloads may send id only, which can cause duplicate locale-row inserts.
+    if (typeof section.id === "string" && section.id.trim() && typeof section._id !== "string") {
+      section._id = section.id;
+    }
+    delete section.id;
     delete section._parent_id;
     delete section._locale;
     return section;
