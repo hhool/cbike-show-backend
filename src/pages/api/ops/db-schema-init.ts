@@ -173,6 +173,10 @@ const DDL_STATEMENTS = [
   `UPDATE "reviews" SET "_status" = 'draft' WHERE "_status" IS NULL`,
   `UPDATE "site_pages" SET "_status" = 'draft' WHERE "_status" IS NULL`,
 
+  // Localized categories write path persists translated names in categories_locales.
+  // Keep base-table categories.name nullable to avoid upsert failures during admin save.
+  `ALTER TABLE "categories" ALTER COLUMN "name" DROP NOT NULL`,
+
   // Ensure site_pages_sections has id column expected by Payload lateral joins.
   `ALTER TABLE "site_pages_sections" ADD COLUMN IF NOT EXISTS "id" serial`,
 
