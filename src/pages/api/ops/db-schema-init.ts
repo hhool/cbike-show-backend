@@ -209,6 +209,46 @@ const DDL_STATEMENTS = [
   )`,
   `CREATE INDEX IF NOT EXISTS "_site_pages_v_parent_id_idx" ON "_site_pages_v" ("parent_id")`,
 
+  // Re-sync serial sequences for manually created locale/version tables so writes do not fail
+  // with duplicate id errors after existing rows were inserted.
+  `DO $$
+   DECLARE
+     table_name text;
+     seq_name text;
+     max_id integer;
+   BEGIN
+     FOREACH table_name IN ARRAY ARRAY[
+       'products_locales',
+       'categories_locales',
+       'reviews_locales',
+       'site_pages_locales',
+       'site_pages_sections',
+       'site_pages_sections_locales',
+       'locale_entries_locales',
+       'brands_locales',
+       '_products_v',
+       '_reviews_v',
+       '_site_pages_v'
+     ]
+     LOOP
+       IF EXISTS (
+         SELECT 1 FROM information_schema.tables
+         WHERE table_schema = 'public' AND table_name = table_name
+       ) THEN
+         SELECT pg_get_serial_sequence(format('public.%I', table_name), 'id') INTO seq_name;
+         IF seq_name IS NOT NULL THEN
+           EXECUTE format('SELECT max(id)::integer FROM public.%I', table_name) INTO max_id;
+           IF max_id IS NULL THEN
+             PERFORM setval(seq_name, 1, false);
+           ELSE
+             PERFORM setval(seq_name, max_id, true);
+           END IF;
+         END IF;
+       END IF;
+     END LOOP;
+   END
+   $$`,
+
   // Reset stale admin list/filter preferences that can keep specific collection pages blank
   // even when collection APIs are healthy (safe to rerun in production).
   `DO $$
