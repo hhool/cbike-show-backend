@@ -13,7 +13,6 @@ export const Products: CollectionConfig = {
     read: () => true,
     readVersions: () => true,
   },
-  versions: { drafts: true },
   fields: [
     { name: "modelName", type: "text", required: true, label: { en: "Model", zh: "型号" }, admin: { description: "前台展示的主型号名称。" } },
     { name: "slug", type: "text", required: true, unique: true, index: true, label: { en: "Slug", zh: "标识" }, admin: { description: "用于 URL 和数据关联，建议固定且唯一。" } },

@@ -15,7 +15,6 @@ export const SitePages: CollectionConfig = {
     read: () => true,
     readVersions: () => true,
   },
-  versions: { drafts: true },
   fields: [
     {
       name: "slug",

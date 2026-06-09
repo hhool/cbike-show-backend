@@ -77,7 +77,6 @@ export const Reviews: CollectionConfig = {
     read: () => true,
     readVersions: () => true,
   },
-  versions: { drafts: true },
   fields: [
     {
       name: "title",
