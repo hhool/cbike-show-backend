@@ -77,6 +77,10 @@ function missingLabel(field: "title" | "summary" | "body" | null, locale: "zh" |
   return "Missing Body";
 }
 
+function normalizeComparableText(value: unknown): string {
+  return String(value ?? "").trim().replace(/\s+/g, " ").toLowerCase();
+}
+
 const shortcutCards: ShortcutCard[] = [
   {
     title: "评测编辑 Review Editing",
@@ -218,6 +222,11 @@ export default async function Page({ params, searchParams }: Args) {
   let enComplete = false;
   let zhMissingField: "title" | "summary" | "body" | null = null;
   let enMissingField: "title" | "summary" | "body" | null = null;
+  let hasSameTitle = false;
+  let hasSameSummary = false;
+  let hasSameBody = false;
+  let recommendedStatusZh = "建议状态：draft（先完善中文）";
+  let recommendedStatusEn = "Suggested status: draft (complete Chinese first)";
   if (isReviewEdit) {
     const reviewId = segments[2];
     const [zhDoc, enDoc] = await Promise.all([
@@ -228,6 +237,25 @@ export default async function Page({ params, searchParams }: Args) {
     enComplete = isLocaleCopyComplete(enDoc);
     zhMissingField = getFirstMissingField(zhDoc);
     enMissingField = getFirstMissingField(enDoc);
+
+    const zhTitle = normalizeComparableText(zhDoc?.title);
+    const enTitle = normalizeComparableText(enDoc?.title);
+    const zhSummary = normalizeComparableText(zhDoc?.summary);
+    const enSummary = normalizeComparableText(enDoc?.summary);
+    const zhBody = normalizeComparableText(extractRichTextPlainText(zhDoc?.body));
+    const enBody = normalizeComparableText(extractRichTextPlainText(enDoc?.body));
+
+    hasSameTitle = Boolean(zhTitle && enTitle && zhTitle === enTitle);
+    hasSameSummary = Boolean(zhSummary && enSummary && zhSummary === enSummary);
+    hasSameBody = Boolean(zhBody && enBody && zhBody === enBody);
+
+    if (zhComplete && !enComplete) {
+      recommendedStatusZh = "建议状态：compliance（中文已完成，继续补英文）";
+      recommendedStatusEn = "Suggested status: compliance (zh ready, continue en copy)";
+    } else if (zhComplete && enComplete) {
+      recommendedStatusZh = "建议状态：chief / published（双语完整，可进入终审与发布）";
+      recommendedStatusEn = "Suggested status: chief / published (both locales complete)";
+    }
   }
 
   const reviewDocs = reviewsResult.docs.length;
@@ -389,6 +417,17 @@ export default async function Page({ params, searchParams }: Args) {
             >
               <span>zh: {missingLabel(zhMissingField, "zh")}</span>
               <span>en: {missingLabel(enMissingField, "en")}</span>
+              <span style={{ color: "var(--theme-success-700, #145a39)", fontWeight: 700 }}>{recommendedStatusZh}</span>
+              <span style={{ color: "var(--theme-success-700, #145a39)", fontWeight: 700 }}>{recommendedStatusEn}</span>
+              {(hasSameTitle || hasSameSummary || hasSameBody) && (
+                <span style={{ color: "var(--theme-error-700, #8f1d1d)", fontWeight: 700 }}>
+                  预警：检测到 zh/en 存在相同内容（
+                  {[hasSameTitle ? "title" : null, hasSameSummary ? "summary" : null, hasSameBody ? "body" : null]
+                    .filter(Boolean)
+                    .join("/")}
+                  ），请确认 en 是否已翻译。Warning: zh/en fields look identical; verify English translation.
+                </span>
+              )}
             </div>
           )}
         </section>
