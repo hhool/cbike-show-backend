@@ -1,5 +1,16 @@
 import type { CollectionConfig } from "payload";
 
+function sanitizeSections(input: unknown): unknown {
+  if (!Array.isArray(input)) return input;
+  return input.map((item) => {
+    if (!item || typeof item !== "object") return item;
+    const section = { ...(item as Record<string, unknown>) };
+    delete section._parent_id;
+    delete section._locale;
+    return section;
+  });
+}
+
 export const SitePages: CollectionConfig = {
   slug: "site-pages",
   labels: {
@@ -77,5 +88,15 @@ export const SitePages: CollectionConfig = {
       ]
     }
   ],
+  hooks: {
+    beforeValidate: [
+      ({ data }) => {
+        if (!data || typeof data !== "object") return data;
+        const next = { ...(data as Record<string, unknown>) };
+        next.sections = sanitizeSections(next.sections);
+        return next;
+      },
+    ],
+  },
   timestamps: true
 };
