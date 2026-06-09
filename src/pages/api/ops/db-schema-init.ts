@@ -69,9 +69,10 @@ const DDL_STATEMENTS = [
   `CREATE INDEX IF NOT EXISTS "site_pages_sections_parent_id_idx" ON "site_pages_sections" ("_parent_id")`,
 
   // site_pages_sections_locales
+  // Note: no FK on _parent_id to avoid PK column name mismatch with the pre-existing production table.
   `CREATE TABLE IF NOT EXISTS "site_pages_sections_locales" (
     "id"         serial PRIMARY KEY NOT NULL,
-    "_parent_id" integer NOT NULL REFERENCES "site_pages_sections"("id") ON DELETE CASCADE,
+    "_parent_id" integer NOT NULL,
     "_locale"    varchar(10) NOT NULL,
     "heading"    text,
     "body"       jsonb,
