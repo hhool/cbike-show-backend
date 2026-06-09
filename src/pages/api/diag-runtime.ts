@@ -30,11 +30,19 @@ type DiagResponse = {
         code?: string;
       };
     };
+    dbMigration: {
+      adapterSupportsMigrate: boolean;
+      hasSchemaDrift: boolean;
+      driftSignals: string[];
+      recommendedActions: string[];
+    };
     probes: ProbeResult[];
   };
 };
 
 const HEADER = "x-diag-secret";
+
+const PROBE_COLLECTIONS = ["media", "products", "categories", "reviews", "site-pages", "locale-entries"] as const;
 
 const toSafeError = (error: unknown): { name: string; message: string; code?: string } => {
   if (error instanceof Error) {
@@ -63,7 +71,7 @@ const toSafeError = (error: unknown): { name: string; message: string; code?: st
 
 const runProbe = async (
   payload: Awaited<ReturnType<typeof getPayload>>,
-  collection: "media" | "products"
+  collection: (typeof PROBE_COLLECTIONS)[number]
 ): Promise<ProbeResult> => {
   try {
     const result = await payload.find({
@@ -86,6 +94,27 @@ const runProbe = async (
     };
   }
 };
+
+function detectSchemaDriftSignals(probes: ProbeResult[]): string[] {
+  const signals = new Set<string>();
+
+  for (const probe of probes) {
+    if (probe.ok || !probe.error?.message) continue;
+    const message = probe.error.message.toLowerCase();
+
+    if (message.includes("does not exist") || message.includes("undefined column") || message.includes("no such column")) {
+      signals.add(`missing table/column in collection '${probe.collection}'`);
+    }
+    if (message.includes("_reviews_v") || message.includes("version_slug")) {
+      signals.add("reviews version table mismatch (_reviews_v / version_slug)");
+    }
+    if (message.includes("_status")) {
+      signals.add("draft status column mismatch (_status)");
+    }
+  }
+
+  return Array.from(signals);
+}
 
 export default async function handler(req: NextApiRequest, res: NextApiResponse<DiagResponse | { error: string }>) {
   if (req.method !== "GET") {
@@ -116,16 +145,37 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
 
   try {
     const payload = await getPayload({ config });
-    const mediaProbe = await runProbe(payload, "media");
-    const productProbe = await runProbe(payload, "products");
+    const probes = await Promise.all(PROBE_COLLECTIONS.map((collection) => runProbe(payload, collection)));
+    const driftSignals = detectSchemaDriftSignals(probes);
+    const dbAdapter = (payload as any)?.db as
+      | { migrate?: () => Promise<void>; migrateStatus?: () => Promise<void> }
+      | undefined;
+    const adapterSupportsMigrate = Boolean(dbAdapter?.migrate);
+
+    if (driftSignals.length > 0) {
+      console.error("[diag-runtime][schema-drift]", {
+        driftSignals,
+        failedCollections: probes.filter((probe) => !probe.ok).map((probe) => probe.collection),
+      });
+    }
 
     return res.status(200).json({
-      ok: mediaProbe.ok && productProbe.ok,
+      ok: probes.every((probe) => probe.ok),
       now: new Date().toISOString(),
       checks: {
         env,
         payloadInit: { ok: true },
-        probes: [mediaProbe, productProbe],
+        dbMigration: {
+          adapterSupportsMigrate,
+          hasSchemaDrift: driftSignals.length > 0,
+          driftSignals,
+          recommendedActions: [
+            "Run migrations: npm run db:migrate",
+            "Check migration status: npm run db:migrate:status",
+            "On deployed environments, call POST /api/ops/db-migrate with x-diag-secret header",
+          ],
+        },
+        probes,
       },
     });
   } catch (error) {
@@ -137,6 +187,12 @@ export default async function handler(req: NextApiRequest, res: NextApiResponse<
         payloadInit: {
           ok: false,
           error: toSafeError(error),
+        },
+        dbMigration: {
+          adapterSupportsMigrate: false,
+          hasSchemaDrift: false,
+          driftSignals: [],
+          recommendedActions: ["Ensure Payload boot succeeds before running migration diagnostics."],
         },
         probes: [],
       },

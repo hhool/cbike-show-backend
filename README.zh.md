@@ -60,3 +60,28 @@ npx tsx scripts/seed.ts
 
 - `PROTOTYPE_SITE_URL`：静态 Vercel 前端域名，默认线上原型为 `https://cbike-show-front.vercel.app`
 - `CORS_ORIGINS`：附加允许访问后端 API 的前端来源，多个域名用逗号分隔
+
+## 紧急处置：部署后出现 Failed query
+
+如果日志持续出现 `Failed query`、`_reviews_v`、`version_slug` 或 `_status` 缺失，通常表示线上数据库 schema 落后于当前 Payload 配置。
+
+1. 先跑运行诊断：
+
+```bash
+curl -s -H "x-diag-secret: $DIAG_TRIGGER_SECRET" https://<your-host>/api/diag-runtime
+```
+
+2. 对生产 `DATABASE_URL` 执行迁移：
+
+```bash
+npm run db:migrate
+```
+
+3. 若平台无法进 Shell（例如 Vercel），可调用受保护迁移接口：
+
+```bash
+curl -s -X POST -H "x-diag-secret: $DIAG_TRIGGER_SECRET" \
+	"https://<your-host>/api/ops/db-migrate?action=migrate"
+```
+
+4. 再次执行诊断，确认 probes 全部 `ok: true`。

@@ -158,3 +158,28 @@ Manual acceptance checklist:
 - `../env/process/ProductionAcceptanceChecklist_V1_zh.md`
 - `../env/process/ProductionAcceptanceChecklist_V1_en.md`
 
+## Emergency: Fix "Failed query" After Deployment
+
+If logs show repeated errors like `Failed query`, `_reviews_v`, `version_slug`, or missing `_status`, your deployed DB schema is likely behind current Payload config.
+
+1. Check runtime probes:
+
+```bash
+curl -s -H "x-diag-secret: $DIAG_TRIGGER_SECRET" https://<your-host>/api/diag-runtime
+```
+
+2. Run migrations against your production `DATABASE_URL`:
+
+```bash
+npm run db:migrate
+```
+
+3. If you cannot open a server shell (for example on Vercel), trigger secured migration endpoint:
+
+```bash
+curl -s -X POST -H "x-diag-secret: $DIAG_TRIGGER_SECRET" \
+	"https://<your-host>/api/ops/db-migrate?action=migrate"
+```
+
+4. Re-run diagnostics and confirm all probes are `ok: true`.
+
