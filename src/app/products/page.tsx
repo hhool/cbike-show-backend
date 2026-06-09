@@ -5,6 +5,12 @@ type ProductsPageProps = {
   searchParams?: Promise<{ lang?: string; q?: string; region?: string; brand?: string; category?: string }>;
 };
 
+function omitStatusFilter(where: Record<string, unknown>): Record<string, unknown> {
+  const next = { ...where };
+  delete next._status;
+  return next;
+}
+
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
   const params = (await searchParams) || {};
   const locale = pickLocale(params.lang);
@@ -98,14 +104,26 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
     depth: 0,
   }, "quick-brands");
 
-  const productsResult = await safeFind({
+  const productsQueryArgs: Parameters<typeof payload.find>[0] = {
     collection: "products",
     limit: 12,
     sort: "-updatedAt",
     locale,
     depth: 1,
     where: whereClause,
-  }, "products-list");
+  };
+
+  let productsResult = await safeFind(productsQueryArgs, "products-list");
+  let usedStatusFallback = false;
+
+  if (productsResult.docs.length === 0) {
+    const fallbackWhere = omitStatusFilter(whereClause);
+    productsResult = await safeFind({
+      ...productsQueryArgs,
+      where: fallbackWhere,
+    }, "products-list-without-status");
+    usedStatusFallback = productsResult.docs.length > 0;
+  }
 
   const title = page?.heroTitle || page?.title || (locale === "en" ? "Products" : "产品库");
   const subtitle =
@@ -220,6 +238,13 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
           </article>
         )}
       </section>
+      {usedStatusFallback && (
+        <p style={{ marginTop: 10, color: "#8a5b00", fontSize: 13 }}>
+          {locale === "en"
+            ? "Compatibility mode: displaying records without publish-status filter. Please run database migrations to restore strict published filtering."
+            : "兼容模式：当前未按发布状态过滤展示数据。请尽快执行数据库迁移，以恢复严格的“已发布”过滤。"}
+        </p>
+      )}
     </main>
   );
 }

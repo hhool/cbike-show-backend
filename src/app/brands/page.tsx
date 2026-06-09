@@ -31,15 +31,19 @@ export default async function BrandsPage({ searchParams }: BrandsPageProps) {
     whereClause.country = { equals: country };
   }
 
-  const brandsResult = await payload.find({
+  const brandQueryArgs: Parameters<typeof payload.find>[0] = {
     collection: "brands",
     limit: 200,
     pagination: false,
     sort: "-priorityScore",
     locale,
-    where: whereClause,
     depth: 0,
-  });
+  };
+  if (Object.keys(whereClause).length > 0) {
+    brandQueryArgs.where = whereClause;
+  }
+
+  const brandsResult = await payload.find(brandQueryArgs);
 
   const brands = brandsResult.docs as BrandDoc[];
   const title = page?.heroTitle || page?.title || (locale === "en" ? "Global Brand Top5 by Region/Country" : "全球品牌 Top5（按区域/国家）");
