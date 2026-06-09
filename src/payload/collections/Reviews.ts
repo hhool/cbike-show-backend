@@ -1,4 +1,4 @@
-import type { CollectionConfig } from "payload";
+import { ValidationError, type CollectionConfig } from "payload";
 
 type LocalizedSnapshot = {
   title: string;
@@ -201,7 +201,16 @@ export const Reviews: CollectionConfig = {
           const enDetails = missingByLocale
             .map((entry) => `${localeLabel(entry.locale, "en")}[${entry.missing.map((field) => fieldLabel(field, "en")).join("/")}]`)
             .join(", ");
-          throw new Error(`发布已阻止：以下语言字段未完整 ${zhDetails}。Publishing blocked: missing localized fields ${enDetails}.`);
+          throw new ValidationError({
+            collection: "reviews",
+            errors: [
+              {
+                path: "status",
+                message: `发布已阻止：以下语言字段未完整 ${zhDetails}。Publishing blocked: missing localized fields ${enDetails}.`,
+              },
+            ],
+            req,
+          });
         }
 
         return nextData;
