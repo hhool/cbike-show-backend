@@ -96,6 +96,11 @@ const DDL_STATEMENTS = [
   )`,
   `CREATE INDEX IF NOT EXISTS "site_pages_sections_locales_parent_id_idx" ON "site_pages_sections_locales" ("_parent_id")`,
 
+  // Legacy compatibility: production sections.id is varchar, align locales._parent_id to varchar explicitly.
+  `ALTER TABLE "site_pages_sections_locales"
+   ALTER COLUMN "_parent_id" TYPE varchar(255)
+   USING "_parent_id"::varchar`,
+
   // Ensure parent id type matches sections.id type to avoid join operator/type errors.
   `DO $$
    DECLARE
