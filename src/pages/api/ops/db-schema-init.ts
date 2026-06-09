@@ -106,6 +106,14 @@ const DDL_STATEMENTS = [
   `ALTER TABLE "reviews" ADD COLUMN IF NOT EXISTS "_status" varchar(20) DEFAULT 'draft'`,
   `ALTER TABLE "site_pages" ADD COLUMN IF NOT EXISTS "_status" varchar(20) DEFAULT 'draft'`,
 
+  // Backfill _status for existing rows; DEFAULT only affects new rows.
+  `UPDATE "products" SET "_status" = 'draft' WHERE "_status" IS NULL`,
+  `UPDATE "reviews" SET "_status" = 'draft' WHERE "_status" IS NULL`,
+  `UPDATE "site_pages" SET "_status" = 'draft' WHERE "_status" IS NULL`,
+
+  // Ensure site_pages_sections has id column expected by Payload lateral joins.
+  `ALTER TABLE "site_pages_sections" ADD COLUMN IF NOT EXISTS "id" serial`,
+
   // versions tables for collections that have drafts: true
   `CREATE TABLE IF NOT EXISTS "_products_v" (
     "id"           serial PRIMARY KEY NOT NULL,
