@@ -167,17 +167,8 @@ export const Reviews: CollectionConfig = {
             : "draft";
 
         if (isCreate && nextStatus !== "draft") {
-          throw new ValidationError({
-            collection: "reviews",
-            errors: [
-              {
-                path: "status",
-                message:
-                  "新建评测必须先保存为草稿（draft），再按流程推进到 compliance/chief/published。New reviews must be created as draft first, then promoted to compliance/chief/published.",
-              },
-            ],
-            req,
-          });
+          // Create flow is always normalized to draft to reduce admin friction.
+          nextData.status = "draft";
         }
 
         const locales: Array<"zh" | "en"> = ["zh", "en"];
