@@ -34,6 +34,49 @@ type TaskCard = {
   tone: ShortcutCard["tone"];
 };
 
+function extractRichTextPlainText(value: unknown): string {
+  if (!value || typeof value !== "object") return "";
+
+  const walk = (node: any): string => {
+    if (!node || typeof node !== "object") return "";
+
+    const text = typeof node.text === "string" ? node.text : "";
+    const children = Array.isArray(node.children) ? node.children.map(walk).join(" ") : "";
+    return `${text} ${children}`.trim();
+  };
+
+  return walk(value).replace(/\s+/g, " ").trim();
+}
+
+function isLocaleCopyComplete(doc: any): boolean {
+  const title = String(doc?.title ?? "").trim();
+  const summary = String(doc?.summary ?? "").trim();
+  const body = extractRichTextPlainText(doc?.body);
+  return Boolean(title && summary && body);
+}
+
+function getFirstMissingField(doc: any): "title" | "summary" | "body" | null {
+  const title = String(doc?.title ?? "").trim();
+  if (!title) return "title";
+  const summary = String(doc?.summary ?? "").trim();
+  if (!summary) return "summary";
+  const body = extractRichTextPlainText(doc?.body);
+  if (!body) return "body";
+  return null;
+}
+
+function missingLabel(field: "title" | "summary" | "body" | null, locale: "zh" | "en"): string {
+  if (!field) return locale === "zh" ? "已完成" : "Done";
+  if (locale === "zh") {
+    if (field === "title") return "缺标题";
+    if (field === "summary") return "缺摘要";
+    return "缺正文";
+  }
+  if (field === "title") return "Missing Title";
+  if (field === "summary") return "Missing Summary";
+  return "Missing Body";
+}
+
 const shortcutCards: ShortcutCard[] = [
   {
     title: "评测编辑 Review Editing",
@@ -119,7 +162,34 @@ export const generateMetadata = ({ params, searchParams }: Args): Promise<Metada
 
 export default async function Page({ params, searchParams }: Args) {
   const { segments = [] } = await params;
+  const query = await searchParams;
   const isDashboardRoot = segments.length === 0;
+  const isReviewCreate = segments[0] === "collections" && segments[1] === "reviews" && segments[2] === "create";
+  const isReviewEdit =
+    segments[0] === "collections" &&
+    segments[1] === "reviews" &&
+    typeof segments[2] === "string" &&
+    segments[2].length > 0 &&
+    segments[2] !== "create";
+  const isReviewLocalizedEditor = isReviewCreate || isReviewEdit;
+
+  const localeQuery = Array.isArray(query.locale) ? query.locale[0] : query.locale;
+  const activeLocale: "zh" | "en" = localeQuery === "en" ? "en" : "zh";
+
+  const reviewLocaleHref = (targetLocale: "zh" | "en") => {
+    const reviewPath = `/admin/${segments.join("/")}`;
+    const params = new URLSearchParams();
+    for (const [key, value] of Object.entries(query)) {
+      if (key === "locale") continue;
+      if (Array.isArray(value)) {
+        for (const v of value) params.append(key, v);
+      } else if (value !== undefined) {
+        params.set(key, value);
+      }
+    }
+    params.set("locale", targetLocale);
+    return `${reviewPath}?${params.toString()}`;
+  };
 
   if (segments[0] === "create-first-user") {
     const payload = await getPayload({ config });
@@ -142,6 +212,22 @@ export default async function Page({ params, searchParams }: Args) {
     payload.find({ collection: "locale-entries", depth: 0, limit: 300, pagination: false }),
     payload.find({ collection: "categories", depth: 0, limit: 300, pagination: false })
   ]);
+
+  let zhComplete = false;
+  let enComplete = false;
+  let zhMissingField: "title" | "summary" | "body" | null = null;
+  let enMissingField: "title" | "summary" | "body" | null = null;
+  if (isReviewEdit) {
+    const reviewId = segments[2];
+    const [zhDoc, enDoc] = await Promise.all([
+      payload.findByID({ collection: "reviews", id: reviewId, depth: 0, locale: "zh", fallbackLocale: false }),
+      payload.findByID({ collection: "reviews", id: reviewId, depth: 0, locale: "en", fallbackLocale: false })
+    ]);
+    zhComplete = isLocaleCopyComplete(zhDoc);
+    enComplete = isLocaleCopyComplete(enDoc);
+    zhMissingField = getFirstMissingField(zhDoc);
+    enMissingField = getFirstMissingField(enDoc);
+  }
 
   const reviewDocs = reviewsResult.docs.length;
   const publishedReviews = reviewsResult.docs.filter((doc: any) => doc?.status === "published").length;
@@ -191,6 +277,121 @@ export default async function Page({ params, searchParams }: Args) {
 
   return (
     <>
+      {isReviewLocalizedEditor && (
+        <section
+          style={{
+            position: "sticky",
+            top: 0,
+            margin: "12px 16px 0",
+            zIndex: 9,
+            border: "1px solid var(--theme-elevation-150, #dfe6eb)",
+            borderRadius: 8,
+            background: "var(--theme-elevation-0, #ffffff)",
+            boxShadow: "0 1px 0 rgba(0, 0, 0, 0.04)",
+            padding: "10px 12px",
+          }}
+        >
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", gap: 12, flexWrap: "wrap" }}>
+            <div>
+              <div style={{ fontWeight: 700, fontSize: 13, color: "var(--theme-text, #1f2933)" }}>
+                {isReviewCreate ? "新建评测语言快捷切换 Quick Locale Switch" : "编辑评测语言快捷切换 Quick Locale Switch"}
+              </div>
+              <div style={{ marginTop: 4, fontSize: 12, color: "var(--theme-text-light, #5b6670)" }}>
+                先填 zh 再切 en。按钮会直接切换内容 locale，避免手改 URL。Fill zh first, then switch to en.
+              </div>
+            </div>
+
+            <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+              <a
+                href={reviewLocaleHref("zh")}
+                style={{
+                  textDecoration: "none",
+                  border: "1px solid",
+                  borderColor: activeLocale === "zh" ? "var(--theme-success-400, #59b284)" : "var(--theme-elevation-200, #c8d2da)",
+                  background: activeLocale === "zh" ? "var(--theme-success-100, #eaf6ef)" : "var(--theme-elevation-0, #ffffff)",
+                  color: "var(--theme-text, #1f2933)",
+                  borderRadius: 999,
+                  padding: "4px 10px",
+                  fontSize: 12,
+                  fontWeight: 700,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                }}
+              >
+                中文填写 zh
+                {isReviewEdit && (
+                  <span
+                    style={{
+                      fontSize: 10,
+                      fontWeight: 700,
+                      borderRadius: 999,
+                      padding: "1px 6px",
+                      border: "1px solid",
+                      borderColor: zhComplete ? "var(--theme-success-300, #87c9a8)" : "var(--theme-warning-300, #f0c27a)",
+                      background: zhComplete ? "var(--theme-success-50, #f0f9f4)" : "var(--theme-warning-50, #fff7ea)",
+                      color: zhComplete ? "var(--theme-success-700, #145a39)" : "var(--theme-warning-800, #8a5a14)",
+                    }}
+                  >
+                    {zhComplete ? "已完成" : "未完成"}
+                  </span>
+                )}
+              </a>
+              <a
+                href={reviewLocaleHref("en")}
+                style={{
+                  textDecoration: "none",
+                  border: "1px solid",
+                  borderColor: activeLocale === "en" ? "var(--theme-success-400, #59b284)" : "var(--theme-elevation-200, #c8d2da)",
+                  background: activeLocale === "en" ? "var(--theme-success-100, #eaf6ef)" : "var(--theme-elevation-0, #ffffff)",
+                  color: "var(--theme-text, #1f2933)",
+                  borderRadius: 999,
+                  padding: "4px 10px",
+                  fontSize: 12,
+                  fontWeight: 700,
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 6,
+                }}
+              >
+                English Copy en
+                {isReviewEdit && (
+                  <span
+                    style={{
+                      fontSize: 10,
+                      fontWeight: 700,
+                      borderRadius: 999,
+                      padding: "1px 6px",
+                      border: "1px solid",
+                      borderColor: enComplete ? "var(--theme-success-300, #87c9a8)" : "var(--theme-warning-300, #f0c27a)",
+                      background: enComplete ? "var(--theme-success-50, #f0f9f4)" : "var(--theme-warning-50, #fff7ea)",
+                      color: enComplete ? "var(--theme-success-700, #145a39)" : "var(--theme-warning-800, #8a5a14)",
+                    }}
+                  >
+                    {enComplete ? "Done" : "Pending"}
+                  </span>
+                )}
+              </a>
+            </div>
+          </div>
+          {isReviewEdit && (
+            <div
+              style={{
+                marginTop: 8,
+                fontSize: 11,
+                color: "var(--theme-text-light, #5b6670)",
+                display: "flex",
+                alignItems: "center",
+                gap: 12,
+                flexWrap: "wrap",
+              }}
+            >
+              <span>zh: {missingLabel(zhMissingField, "zh")}</span>
+              <span>en: {missingLabel(enMissingField, "en")}</span>
+            </div>
+          )}
+        </section>
+      )}
       {isDashboardRoot && (
         <section
           style={{
