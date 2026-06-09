@@ -91,7 +91,7 @@ const DDL_STATEMENTS = [
     "_parent_id" integer NOT NULL,
     "_locale"    varchar(10) NOT NULL,
     "heading"    text,
-    "body"       jsonb,
+    "body"       text,
     CONSTRAINT "site_pages_sections_locales_parent_id_locale_unique" UNIQUE("_parent_id", "_locale")
   )`,
   `CREATE INDEX IF NOT EXISTS "site_pages_sections_locales_parent_id_idx" ON "site_pages_sections_locales" ("_parent_id")`,
@@ -138,6 +138,28 @@ const DDL_STATEMENTS = [
          ALTER COLUMN "_parent_id" TYPE text
          USING "_parent_id"::text;
        END IF;
+     END IF;
+   END
+   $$`,
+
+  // Compatibility: SitePages.sections.body is textarea (text). Align legacy jsonb columns.
+  `DO $$
+   BEGIN
+     IF EXISTS (
+       SELECT 1
+       FROM information_schema.columns
+       WHERE table_schema='public'
+         AND table_name='site_pages_sections_locales'
+         AND column_name='body'
+         AND data_type='jsonb'
+     ) THEN
+       ALTER TABLE "site_pages_sections_locales"
+       ALTER COLUMN "body" TYPE text
+       USING CASE
+         WHEN "body" IS NULL THEN NULL
+         WHEN jsonb_typeof("body") = 'string' THEN trim(both '"' from "body"::text)
+         ELSE "body"::text
+       END;
      END IF;
    END
    $$`,
