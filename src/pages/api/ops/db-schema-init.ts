@@ -209,43 +209,33 @@ const DDL_STATEMENTS = [
   )`,
   `CREATE INDEX IF NOT EXISTS "_site_pages_v_parent_id_idx" ON "_site_pages_v" ("parent_id")`,
 
-  // Re-sync serial sequences for manually created locale/version tables so writes do not fail
-  // with duplicate id errors after existing rows were inserted.
+  // Backfill zh localized category names from the legacy base column so admin lists stop showing empty names.
+  `INSERT INTO "categories_locales" ("_parent_id", "_locale", "name")
+   SELECT c."id", 'zh', c."name"
+   FROM "categories" c
+   WHERE c."name" IS NOT NULL
+     AND NOT EXISTS (
+       SELECT 1
+       FROM "categories_locales" cl
+       WHERE cl."_parent_id" = c."id" AND cl."_locale" = 'zh'
+     )`,
+
+  // Re-sync categories_locales serial sequence so saving localized category names does not fail
+  // with duplicate primary key errors after the backfill inserts.
   `DO $$
    DECLARE
-     table_name text;
      seq_name text;
      max_id integer;
    BEGIN
-     FOREACH table_name IN ARRAY ARRAY[
-       'products_locales',
-       'categories_locales',
-       'reviews_locales',
-       'site_pages_locales',
-       'site_pages_sections',
-       'site_pages_sections_locales',
-       'locale_entries_locales',
-       'brands_locales',
-       '_products_v',
-       '_reviews_v',
-       '_site_pages_v'
-     ]
-     LOOP
-       IF EXISTS (
-         SELECT 1 FROM information_schema.tables
-         WHERE table_schema = 'public' AND table_name = table_name
-       ) THEN
-         SELECT pg_get_serial_sequence(format('public.%I', table_name), 'id') INTO seq_name;
-         IF seq_name IS NOT NULL THEN
-           EXECUTE format('SELECT max(id)::integer FROM public.%I', table_name) INTO max_id;
-           IF max_id IS NULL THEN
-             PERFORM setval(seq_name, 1, false);
-           ELSE
-             PERFORM setval(seq_name, max_id, true);
-           END IF;
-         END IF;
+     SELECT pg_get_serial_sequence('public.categories_locales', 'id') INTO seq_name;
+     IF seq_name IS NOT NULL THEN
+       SELECT max(id)::integer INTO max_id FROM "categories_locales";
+       IF max_id IS NULL THEN
+         PERFORM setval(seq_name, 1, false);
+       ELSE
+         PERFORM setval(seq_name, max_id, true);
        END IF;
-     END LOOP;
+     END IF;
    END
    $$`,
 
