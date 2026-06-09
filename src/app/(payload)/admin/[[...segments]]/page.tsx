@@ -227,6 +227,9 @@ export default async function Page({ params, searchParams }: Args) {
   let hasSameBody = false;
   let recommendedStatusZh = "建议状态：draft（先完善中文）";
   let recommendedStatusEn = "Suggested status: draft (complete Chinese first)";
+  let currentStatus: string | null = null;
+  let statusRiskZh = "";
+  let statusRiskEn = "";
   if (isReviewEdit) {
     const reviewId = segments[2];
     const [zhDoc, enDoc] = await Promise.all([
@@ -248,6 +251,7 @@ export default async function Page({ params, searchParams }: Args) {
     hasSameTitle = Boolean(zhTitle && enTitle && zhTitle === enTitle);
     hasSameSummary = Boolean(zhSummary && enSummary && zhSummary === enSummary);
     hasSameBody = Boolean(zhBody && enBody && zhBody === enBody);
+    currentStatus = String(zhDoc?.status ?? "").trim() || null;
 
     if (zhComplete && !enComplete) {
       recommendedStatusZh = "建议状态：compliance（中文已完成，继续补英文）";
@@ -255,6 +259,14 @@ export default async function Page({ params, searchParams }: Args) {
     } else if (zhComplete && enComplete) {
       recommendedStatusZh = "建议状态：chief / published（双语完整，可进入终审与发布）";
       recommendedStatusEn = "Suggested status: chief / published (both locales complete)";
+    }
+
+    if (currentStatus === "published" && (!zhComplete || !enComplete)) {
+      statusRiskZh = "风险：当前状态为 published，但双语内容未完整。下次保存会被发布校验阻断。";
+      statusRiskEn = "Risk: status is published while bilingual copy is incomplete; next save will be blocked by publish guard.";
+    } else if (currentStatus === "chief" && (!zhComplete || !enComplete)) {
+      statusRiskZh = "提示：当前为 chief，但双语尚未补齐，建议先回补再发布。";
+      statusRiskEn = "Notice: status is chief but bilingual copy is incomplete; complete content before publish.";
     }
   }
 
@@ -327,6 +339,7 @@ export default async function Page({ params, searchParams }: Args) {
               </div>
               <div style={{ marginTop: 4, fontSize: 12, color: "var(--theme-text-light, #5b6670)" }}>
                 先填 zh 再切 en。按钮会直接切换内容 locale，避免手改 URL。Fill zh first, then switch to en.
+                {isReviewCreate ? " 新建时若误选非 draft，保存会自动回落为 draft。On create, non-draft status will auto-normalize to draft." : ""}
               </div>
             </div>
 
@@ -426,6 +439,11 @@ export default async function Page({ params, searchParams }: Args) {
                     .filter(Boolean)
                     .join("/")}
                   ），请确认 en 是否已翻译。Warning: zh/en fields look identical; verify English translation.
+                </span>
+              )}
+              {statusRiskZh && (
+                <span style={{ color: "var(--theme-warning-800, #8a5a14)", fontWeight: 700 }}>
+                  {statusRiskZh} {statusRiskEn}
                 </span>
               )}
             </div>
