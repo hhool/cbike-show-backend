@@ -38,6 +38,14 @@ export default async function BrandsPage({ searchParams }: BrandsPageProps) {
     sort: "-priorityScore",
     locale,
     depth: 0,
+    select: {
+      id: true,
+      name: true,
+      slug: true,
+      region: true,
+      country: true,
+      priorityScore: true,
+    },
   };
   if (Object.keys(whereClause).length > 0) {
     brandQueryArgs.where = whereClause;
