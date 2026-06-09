@@ -15,41 +15,51 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
 
   const { payload, page } = await getSitePageBySlug("products", locale);
 
+  const safeFind = async (args: Parameters<typeof payload.find>[0], label: string): Promise<{ docs: any[] }> => {
+    try {
+      const result = await payload.find(args);
+      return { docs: Array.isArray(result.docs) ? (result.docs as any[]) : [] };
+    } catch (error) {
+      console.error(`[products-page] failed to query ${label}`, error);
+      return { docs: [] };
+    }
+  };
+
   let brandIdsByRegion: number[] = [];
   if (region) {
-    const brandResult = await payload.find({
+    const brandResult = await safeFind({
       collection: "brands",
       limit: 100,
       pagination: false,
       where: { region: { equals: region } },
       depth: 0,
-    });
+    }, "brands-by-region");
     brandIdsByRegion = brandResult.docs.map((b: any) => b.id).filter((id: unknown): id is number => typeof id === "number");
   }
 
   let selectedBrand: any = null;
   if (brandSlug) {
-    const selectedBrandResult = await payload.find({
+    const selectedBrandResult = await safeFind({
       collection: "brands",
       limit: 1,
       pagination: false,
       locale,
       where: { slug: { equals: brandSlug } },
       depth: 0,
-    });
+    }, "selected-brand");
     selectedBrand = selectedBrandResult.docs[0] || null;
   }
 
   let selectedCategory: any = null;
   if (categorySlug) {
-    const selectedCategoryResult = await payload.find({
+    const selectedCategoryResult = await safeFind({
       collection: "categories",
       limit: 1,
       pagination: false,
       locale,
       where: { slug: { equals: categorySlug } },
       depth: 0,
-    });
+    }, "selected-category");
     selectedCategory = selectedCategoryResult.docs[0] || null;
   }
 
@@ -78,7 +88,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
     whereClause.category = selectedCategory && typeof selectedCategory.id === "number" ? { equals: selectedCategory.id } : { equals: -1 };
   }
 
-  const quickBrandsResult = await payload.find({
+  const quickBrandsResult = await safeFind({
     collection: "brands",
     limit: 8,
     pagination: false,
@@ -86,16 +96,16 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
     sort: "-priorityScore",
     ...(region ? { where: { region: { equals: region } } } : {}),
     depth: 0,
-  });
+  }, "quick-brands");
 
-  const productsResult = await payload.find({
+  const productsResult = await safeFind({
     collection: "products",
     limit: 12,
     sort: "-updatedAt",
     locale,
     depth: 1,
     where: whereClause,
-  });
+  }, "products-list");
 
   const title = page?.heroTitle || page?.title || (locale === "en" ? "Products" : "产品库");
   const subtitle =
