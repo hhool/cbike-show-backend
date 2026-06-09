@@ -68,6 +68,22 @@ const DDL_STATEMENTS = [
   )`,
   `CREATE INDEX IF NOT EXISTS "site_pages_sections_parent_id_idx" ON "site_pages_sections" ("_parent_id")`,
 
+  // Compatibility: some legacy tables store nested row id as _id (text-like) instead of id.
+  `DO $$
+   BEGIN
+     IF EXISTS (
+       SELECT 1 FROM information_schema.columns
+       WHERE table_schema='public' AND table_name='site_pages_sections' AND column_name='_id'
+     ) AND NOT EXISTS (
+       SELECT 1 FROM information_schema.columns
+       WHERE table_schema='public' AND table_name='site_pages_sections' AND column_name='id'
+     ) THEN
+       ALTER TABLE "site_pages_sections" ADD COLUMN "id" text;
+       UPDATE "site_pages_sections" SET "id" = "_id"::text WHERE "id" IS NULL;
+     END IF;
+   END
+   $$`,
+
   // site_pages_sections_locales
   // Note: no FK on _parent_id to avoid PK column name mismatch with the pre-existing production table.
   `CREATE TABLE IF NOT EXISTS "site_pages_sections_locales" (
@@ -79,6 +95,47 @@ const DDL_STATEMENTS = [
     CONSTRAINT "site_pages_sections_locales_parent_id_locale_unique" UNIQUE("_parent_id", "_locale")
   )`,
   `CREATE INDEX IF NOT EXISTS "site_pages_sections_locales_parent_id_idx" ON "site_pages_sections_locales" ("_parent_id")`,
+
+  // Ensure parent id type matches sections.id type to avoid join operator/type errors.
+  `DO $$
+   DECLARE
+     sections_id_type text;
+     locales_parent_type text;
+   BEGIN
+     SELECT data_type INTO sections_id_type
+     FROM information_schema.columns
+     WHERE table_schema='public' AND table_name='site_pages_sections' AND column_name='id'
+     LIMIT 1;
+
+     SELECT data_type INTO locales_parent_type
+     FROM information_schema.columns
+     WHERE table_schema='public' AND table_name='site_pages_sections_locales' AND column_name='_parent_id'
+     LIMIT 1;
+
+     IF sections_id_type IS NOT NULL
+       AND locales_parent_type IS NOT NULL
+       AND sections_id_type <> locales_parent_type
+     THEN
+       IF sections_id_type = 'integer' THEN
+         ALTER TABLE "site_pages_sections_locales"
+         ALTER COLUMN "_parent_id" TYPE integer
+         USING "_parent_id"::integer;
+       ELSIF sections_id_type = 'bigint' THEN
+         ALTER TABLE "site_pages_sections_locales"
+         ALTER COLUMN "_parent_id" TYPE bigint
+         USING "_parent_id"::bigint;
+       ELSIF sections_id_type = 'uuid' THEN
+         ALTER TABLE "site_pages_sections_locales"
+         ALTER COLUMN "_parent_id" TYPE uuid
+         USING "_parent_id"::uuid;
+       ELSE
+         ALTER TABLE "site_pages_sections_locales"
+         ALTER COLUMN "_parent_id" TYPE text
+         USING "_parent_id"::text;
+       END IF;
+     END IF;
+   END
+   $$`,
 
   // locale_entries_locales
   `CREATE TABLE IF NOT EXISTS "locale_entries_locales" (
