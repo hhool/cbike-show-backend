@@ -35,14 +35,17 @@ type TaskCard = {
 };
 
 function extractRichTextPlainText(value: unknown): string {
-  if (!value || typeof value !== "object") return "";
-
   const walk = (node: any): string => {
-    if (!node || typeof node !== "object") return "";
+    if (node == null) return "";
+    if (typeof node === "string") return node;
+    if (Array.isArray(node)) return node.map(walk).join(" ");
+    if (typeof node !== "object") return "";
 
     const text = typeof node.text === "string" ? node.text : "";
-    const children = Array.isArray(node.children) ? node.children.map(walk).join(" ") : "";
-    return `${text} ${children}`.trim();
+    const children = walk(node.children);
+    const root = walk(node.root);
+    const content = walk(node.content);
+    return `${text} ${children} ${root} ${content}`.trim();
   };
 
   return walk(value).replace(/\s+/g, " ").trim();
