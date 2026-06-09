@@ -173,6 +173,80 @@ const DDL_STATEMENTS = [
   `UPDATE "reviews" SET "_status" = 'draft' WHERE "_status" IS NULL`,
   `UPDATE "site_pages" SET "_status" = 'draft' WHERE "_status" IS NULL`,
 
+  // Reviews workflow compatibility: normalize status columns to varchar and allowed values.
+  // This fixes legacy enum/check drift that can cause "only draft can save" in admin.
+  `ALTER TABLE "reviews"
+   ALTER COLUMN "status" TYPE varchar(20)
+   USING "status"::text`,
+  `ALTER TABLE "reviews"
+   ALTER COLUMN "_status" TYPE varchar(20)
+   USING "_status"::text`,
+  `ALTER TABLE "reviews" ALTER COLUMN "status" SET DEFAULT 'draft'`,
+  `ALTER TABLE "reviews" ALTER COLUMN "_status" SET DEFAULT 'draft'`,
+  `UPDATE "reviews"
+   SET "status" = 'draft'
+   WHERE "status" IS NULL
+      OR "status" NOT IN ('draft', 'compliance', 'chief', 'published', 'archived')`,
+  `UPDATE "reviews"
+   SET "_status" = 'draft'
+   WHERE "_status" IS NULL
+      OR "_status" NOT IN ('draft', 'compliance', 'chief', 'published', 'archived')`,
+  `DO $$
+   DECLARE
+     r record;
+   BEGIN
+     FOR r IN
+       SELECT c.conname
+       FROM pg_constraint c
+       JOIN pg_class t ON t.oid = c.conrelid
+       JOIN pg_namespace n ON n.oid = t.relnamespace
+       WHERE n.nspname = 'public'
+         AND t.relname = 'reviews'
+         AND c.contype = 'c'
+         AND (
+           pg_get_constraintdef(c.oid) ILIKE '%"status"%'
+           OR pg_get_constraintdef(c.oid) ILIKE '%"_status"%'
+         )
+     LOOP
+       EXECUTE format('ALTER TABLE public.reviews DROP CONSTRAINT IF EXISTS %I', r.conname);
+     END LOOP;
+   END
+   $$`,
+  `DO $$
+   BEGIN
+     IF NOT EXISTS (
+       SELECT 1
+       FROM pg_constraint c
+       JOIN pg_class t ON t.oid = c.conrelid
+       JOIN pg_namespace n ON n.oid = t.relnamespace
+       WHERE n.nspname = 'public'
+         AND t.relname = 'reviews'
+         AND c.conname = 'reviews_status_allowed_check'
+     ) THEN
+       ALTER TABLE "reviews"
+         ADD CONSTRAINT "reviews_status_allowed_check"
+         CHECK ("status" IN ('draft', 'compliance', 'chief', 'published', 'archived'));
+     END IF;
+   END
+   $$`,
+  `DO $$
+   BEGIN
+     IF NOT EXISTS (
+       SELECT 1
+       FROM pg_constraint c
+       JOIN pg_class t ON t.oid = c.conrelid
+       JOIN pg_namespace n ON n.oid = t.relnamespace
+       WHERE n.nspname = 'public'
+         AND t.relname = 'reviews'
+         AND c.conname = 'reviews__status_allowed_check'
+     ) THEN
+       ALTER TABLE "reviews"
+         ADD CONSTRAINT "reviews__status_allowed_check"
+         CHECK ("_status" IN ('draft', 'compliance', 'chief', 'published', 'archived'));
+     END IF;
+   END
+   $$`,
+
   // Localized categories write path persists translated names in categories_locales.
   // Keep base-table categories.name nullable to avoid upsert failures during admin save.
   `ALTER TABLE "categories" ALTER COLUMN "name" DROP NOT NULL`,
