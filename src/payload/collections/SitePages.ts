@@ -2,15 +2,20 @@ import type { CollectionConfig } from "payload";
 
 function sanitizeSections(input: unknown): unknown {
   if (!Array.isArray(input)) return input;
-  return input.map((item) => {
+  return input.map((item, index) => {
     if (!item || typeof item !== "object") return item;
     const section = { ...(item as Record<string, unknown>) };
-    // Payload array rows are reconciled by _id in updates.
-    // Admin payloads may send id only, which can cause duplicate locale-row inserts.
-    if (typeof section.id === "string" && section.id.trim() && typeof section._id !== "string") {
-      section._id = section.id;
+
+    // Normalize array row keys from admin/API payloads to avoid row recreation.
+    if (typeof section.id !== "string" && typeof section._id === "string" && section._id.trim()) {
+      section.id = section._id;
     }
-    delete section.id;
+
+    if (typeof section._order !== "number" || !Number.isFinite(section._order)) {
+      section._order = index + 1;
+    }
+
+    delete section._id;
     delete section._parent_id;
     delete section._locale;
     return section;
