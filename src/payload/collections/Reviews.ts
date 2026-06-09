@@ -58,6 +58,22 @@ function mergeLocaleDraft(base: Partial<LocalizedSnapshot> | null, data: any): L
   };
 }
 
+type ReviewStatus = "draft" | "compliance" | "chief" | "published" | "archived";
+
+function isReviewStatus(value: unknown): value is ReviewStatus {
+  return value === "draft" || value === "compliance" || value === "chief" || value === "published" || value === "archived";
+}
+
+function canTransitionStatus(from: ReviewStatus, to: ReviewStatus): boolean {
+  if (from === to) return true;
+  if (from === "draft" && (to === "compliance" || to === "archived")) return true;
+  if (from === "compliance" && (to === "draft" || to === "chief" || to === "archived")) return true;
+  if (from === "chief" && (to === "compliance" || to === "published" || to === "archived")) return true;
+  if (from === "published" && (to === "chief" || to === "archived")) return true;
+  if (from === "archived" && to === "draft") return true;
+  return false;
+}
+
 export const Reviews: CollectionConfig = {
   slug: "reviews",
   labels: { singular: { en: "Review", zh: "评测" }, plural: { en: "Reviews", zh: "评测" } },
@@ -152,11 +168,41 @@ export const Reviews: CollectionConfig = {
           nextData.scoreOverall = Math.round(overall * 10) / 10;
         }
 
-        const nextStatus = nextData?.status ?? originalDoc?.status;
+        const docId = String(originalDoc?.id ?? nextData?.id ?? "").trim();
+        const isCreate = !docId;
+        const prevStatus = isReviewStatus(originalDoc?.status) ? originalDoc.status : "draft";
+        const nextStatus = isReviewStatus(nextData?.status) ? nextData.status : prevStatus;
+
+        if (isCreate && nextStatus !== "draft") {
+          throw new ValidationError({
+            collection: "reviews",
+            errors: [
+              {
+                path: "status",
+                message:
+                  "新建评测必须先保存为草稿（draft），再按流程推进到 compliance/chief/published。New reviews must be created as draft first, then promoted to compliance/chief/published.",
+              },
+            ],
+            req,
+          });
+        }
+
+        if (!canTransitionStatus(prevStatus, nextStatus)) {
+          throw new ValidationError({
+            collection: "reviews",
+            errors: [
+              {
+                path: "status",
+                message: `状态流转不允许：${prevStatus} -> ${nextStatus}。Allowed transition blocked by workflow policy.`,
+              },
+            ],
+            req,
+          });
+        }
+
         if (nextStatus !== "published") return nextData;
 
         const locales: Array<"zh" | "en"> = ["zh", "en"];
-        const docId = String(originalDoc?.id ?? nextData?.id ?? "").trim();
         const activeLocale = (req?.locale === "zh" || req?.locale === "en") ? req.locale : null;
 
         const localeSnapshots: Record<"zh" | "en", LocalizedSnapshot> = {
