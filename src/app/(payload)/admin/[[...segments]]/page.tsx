@@ -211,12 +211,29 @@ export default async function Page({ params, searchParams }: Args) {
   }
 
   const payload = await getPayload({ config });
-  const [reviewsResult, productsResult, localeResult, categoriesResult] = await Promise.all([
-    payload.find({ collection: "reviews", depth: 0, limit: 300, pagination: false }),
-    payload.find({ collection: "products", depth: 0, limit: 300, pagination: false }),
-    payload.find({ collection: "locale-entries", depth: 0, limit: 300, pagination: false }),
-    payload.find({ collection: "categories", depth: 0, limit: 300, pagination: false })
-  ]);
+  let reviewsResult: { docs: any[] } = { docs: [] };
+  let productsResult: { docs: any[] } = { docs: [] };
+  let localeResult: { docs: any[] } = { docs: [] };
+  let categoriesResult: { docs: any[] } = { docs: [] };
+
+  if (isDashboardRoot) {
+    const safeFind = async (args: Parameters<typeof payload.find>[0], label: string): Promise<{ docs: any[] }> => {
+      try {
+        const result = await payload.find(args);
+        return { docs: Array.isArray(result.docs) ? (result.docs as any[]) : [] };
+      } catch (error) {
+        console.error(`[admin-dashboard] failed to query ${label}`, error);
+        return { docs: [] };
+      }
+    };
+
+    [reviewsResult, productsResult, localeResult, categoriesResult] = await Promise.all([
+      safeFind({ collection: "reviews", depth: 0, limit: 300, pagination: false }, "reviews"),
+      safeFind({ collection: "products", depth: 0, limit: 300, pagination: false }, "products"),
+      safeFind({ collection: "locale-entries", depth: 0, limit: 300, pagination: false }, "locale-entries"),
+      safeFind({ collection: "categories", depth: 0, limit: 300, pagination: false }, "categories"),
+    ]);
+  }
 
   let zhComplete = false;
   let enComplete = false;

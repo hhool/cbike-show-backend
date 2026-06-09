@@ -15,16 +15,21 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const locale = pickLocale(params.lang);
 
   const payload = await getPayload({ config });
-  const pageResult = await payload.find({
-    collection: "site-pages",
-    where: { slug: { equals: "home" } },
-    limit: 1,
-    pagination: false,
-    locale,
-    depth: 0,
-  });
-
-  const page = pageResult.docs[0];
+  let page: any = null;
+  try {
+    const pageResult = await payload.find({
+      collection: "site-pages",
+      where: { slug: { equals: "home" } },
+      limit: 1,
+      pagination: false,
+      locale,
+      depth: 0,
+      fallbackLocale: false,
+    });
+    page = pageResult.docs[0] ?? null;
+  } catch (error) {
+    console.error("[home] failed to query site-pages/home", error);
+  }
   const title = page?.heroTitle || page?.title || (locale === "en" ? "Cbike Review Lab" : "童车评测实验室");
   const subtitle =
     page?.heroSubtitle ||
@@ -34,15 +39,21 @@ export default async function HomePage({ searchParams }: HomePageProps) {
   const ctaLabel = page?.ctaLabel || (locale === "en" ? "Browse Products" : "查看产品");
   const ctaHref = page?.ctaHref || "/products";
 
-  const localeHintResult = await payload.find({
-    collection: "locale-entries",
-    where: { key: { equals: "home.switchHint" } },
-    limit: 1,
-    pagination: false,
-    locale,
-    depth: 0,
-  });
-  const localeHint = localeHintResult.docs[0]?.value || (locale === "en" ? "Switch language:" : "切换语言:");
+  let localeHint = locale === "en" ? "Switch language:" : "切换语言:";
+  try {
+    const localeHintResult = await payload.find({
+      collection: "locale-entries",
+      where: { key: { equals: "home.switchHint" } },
+      limit: 1,
+      pagination: false,
+      locale,
+      depth: 0,
+      fallbackLocale: false,
+    });
+    localeHint = localeHintResult.docs[0]?.value || localeHint;
+  } catch (error) {
+    console.error("[home] failed to query locale-entries/home.switchHint", error);
+  }
   const localeTarget = locale === "en" ? "Chinese" : "英文";
 
   return (
