@@ -180,7 +180,7 @@ export default async function Page({ params, searchParams }: Args) {
     const reviewPath = `/admin/${segments.join("/")}`;
     const params = new URLSearchParams();
     for (const [key, value] of Object.entries(query)) {
-      if (key === "locale") continue;
+      if (key === "locale" || key === "fallback-locale") continue;
       if (Array.isArray(value)) {
         for (const v of value) params.append(key, v);
       } else if (value !== undefined) {
@@ -188,6 +188,7 @@ export default async function Page({ params, searchParams }: Args) {
       }
     }
     params.set("locale", targetLocale);
+    params.set("fallback-locale", "none");
     return `${reviewPath}?${params.toString()}`;
   };
 

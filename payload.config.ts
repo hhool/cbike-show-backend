@@ -142,6 +142,11 @@ export default buildConfig({
     supportedLanguages: { en, zh },
     fallbackLanguage: "zh"
   },
+  localization: {
+    locales: ["zh", "en"],
+    defaultLocale: "zh",
+    fallback: false,
+  },
   admin: {
     user: Users.slug,
     suppressHydrationWarning: true,

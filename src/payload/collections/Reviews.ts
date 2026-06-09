@@ -64,34 +64,6 @@ function isReviewStatus(value: unknown): value is ReviewStatus {
   return value === "draft" || value === "compliance" || value === "chief" || value === "published" || value === "archived";
 }
 
-function canTransitionStatus(from: ReviewStatus, to: ReviewStatus): boolean {
-  if (from === to) return true;
-  if (from === "draft" && (to === "compliance" || to === "archived")) return true;
-  if (from === "compliance" && (to === "draft" || to === "chief" || to === "archived")) return true;
-  if (from === "chief" && (to === "compliance" || to === "published" || to === "archived")) return true;
-  if (from === "published" && (to === "chief" || to === "archived")) return true;
-  if (from === "archived" && to === "draft") return true;
-  return false;
-}
-
-function formatMissingDetails(
-  missingByLocale: Array<{ locale: "zh" | "en"; missing: Array<"title" | "summary" | "body"> }>,
-  language: "zh" | "en",
-): string {
-  if (language === "zh") {
-    return missingByLocale
-      .map((entry) => {
-        const fields = entry.missing.map((field) => `${fieldLabel(field, "zh")}(${field})`).join("/");
-        return `${localeLabel(entry.locale, "zh")}[${fields}]`;
-      })
-      .join("，");
-  }
-
-  return missingByLocale
-    .map((entry) => `${localeLabel(entry.locale, "en")}[${entry.missing.map((field) => fieldLabel(field, "en")).join("/")}]`)
-    .join(", ");
-}
-
 export const Reviews: CollectionConfig = {
   slug: "reviews",
   labels: { singular: { en: "Review", zh: "评测" }, plural: { en: "Reviews", zh: "评测" } },
@@ -188,8 +160,11 @@ export const Reviews: CollectionConfig = {
 
         const docId = String(originalDoc?.id ?? nextData?.id ?? "").trim();
         const isCreate = !docId;
-        const prevStatus = isReviewStatus(originalDoc?.status) ? originalDoc.status : "draft";
-        const nextStatus = isReviewStatus(nextData?.status) ? nextData.status : prevStatus;
+        const nextStatus = isReviewStatus(nextData?.status)
+          ? nextData.status
+          : isReviewStatus(originalDoc?.status)
+            ? originalDoc.status
+            : "draft";
 
         if (isCreate && nextStatus !== "draft") {
           throw new ValidationError({
@@ -199,19 +174,6 @@ export const Reviews: CollectionConfig = {
                 path: "status",
                 message:
                   "新建评测必须先保存为草稿（draft），再按流程推进到 compliance/chief/published。New reviews must be created as draft first, then promoted to compliance/chief/published.",
-              },
-            ],
-            req,
-          });
-        }
-
-        if (!canTransitionStatus(prevStatus, nextStatus)) {
-          throw new ValidationError({
-            collection: "reviews",
-            errors: [
-              {
-                path: "status",
-                message: `状态流转不允许：${prevStatus} -> ${nextStatus}。Allowed transition blocked by workflow policy.`,
               },
             ],
             req,
@@ -249,46 +211,6 @@ export const Reviews: CollectionConfig = {
           }
         }
 
-        // Stage gate 1: entering compliance requires complete Chinese copy.
-        if (nextStatus === "compliance") {
-          const missingZh = getMissingFields(localeSnapshots.zh);
-          if (missingZh.length > 0) {
-            const zhFields = missingZh.map((field) => `${fieldLabel(field, "zh")}(${field})`).join("/");
-            throw new ValidationError({
-              collection: "reviews",
-              errors: [
-                {
-                  path: "status",
-                  message: `进入合规前请先补齐中文文案：${zhFields}。Before moving to compliance, complete Chinese copy: zh[${missingZh.join("/")}].`,
-                },
-              ],
-              req,
-            });
-          }
-          return nextData;
-        }
-
-        // Stage gate 2: entering chief requires both zh and en complete.
-        if (nextStatus === "chief") {
-          const missingForChief = locales
-            .map((locale) => ({ locale, missing: getMissingFields(localeSnapshots[locale]) }))
-            .filter((entry) => entry.missing.length > 0);
-
-          if (missingForChief.length > 0) {
-            throw new ValidationError({
-              collection: "reviews",
-              errors: [
-                {
-                  path: "status",
-                  message: `进入主编终审前需补齐双语文案：${formatMissingDetails(missingForChief, "zh")}。Before moving to chief review, complete both locales: ${formatMissingDetails(missingForChief, "en")}.`,
-                },
-              ],
-              req,
-            });
-          }
-          return nextData;
-        }
-
         if (nextStatus !== "published") return nextData;
 
         const missingByLocale = locales
@@ -301,7 +223,14 @@ export const Reviews: CollectionConfig = {
             errors: [
               {
                 path: "status",
-                message: `发布已阻止：以下语言字段未完整 ${formatMissingDetails(missingByLocale, "zh")}。Publishing blocked: missing localized fields ${formatMissingDetails(missingByLocale, "en")}.`,
+                message: `发布已阻止：以下语言字段未完整 ${missingByLocale
+                  .map((entry) => {
+                    const fields = entry.missing.map((field) => `${fieldLabel(field, "zh")}(${field})`).join("/");
+                    return `${localeLabel(entry.locale, "zh")}[${fields}]`;
+                  })
+                  .join("，")}。Publishing blocked: missing localized fields ${missingByLocale
+                  .map((entry) => `${localeLabel(entry.locale, "en")}[${entry.missing.map((field) => fieldLabel(field, "en")).join("/")}]`)
+                  .join(", ")}.`,
               },
             ],
             req,
