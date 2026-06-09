@@ -151,7 +151,8 @@ export const Reviews: CollectionConfig = {
   ],
   hooks: {
     beforeChange: [
-      async ({ data, originalDoc, req }) => {
+      async (args: any) => {
+        const { data, originalDoc, req, operation } = args;
         const nextData = { ...(data ?? {}) };
         const s = nextData?.scores;
         if (s && [s.safety, s.comfort, s.portability, s.function, s.value].every((x: unknown) => typeof x === "number")) {
@@ -161,7 +162,7 @@ export const Reviews: CollectionConfig = {
         }
 
         const docId = String(originalDoc?.id ?? nextData?.id ?? "").trim();
-        const isCreate = !docId;
+        const isCreate = operation === "create";
         const nextStatus = isReviewStatus(nextData?.status)
           ? nextData.status
           : isReviewStatus(originalDoc?.status)
@@ -171,6 +172,11 @@ export const Reviews: CollectionConfig = {
         if (isCreate && nextStatus !== "draft") {
           // Create flow is always normalized to draft to reduce admin friction.
           nextData.status = "draft";
+          nextData._status = "draft";
+        } else {
+          // Keep status fields aligned on update so admin workflow state persists consistently.
+          nextData.status = nextStatus;
+          nextData._status = nextStatus;
         }
 
         const locales: Array<"zh" | "en"> = ["zh", "en"];
