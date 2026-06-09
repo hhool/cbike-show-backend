@@ -181,5 +181,13 @@ curl -s -X POST -H "x-diag-secret: $DIAG_TRIGGER_SECRET" \
 	"https://<your-host>/api/ops/db-migrate?action=migrate"
 ```
 
+Or run one command to execute diagnose -> migrate -> diagnose in sequence:
+
+```bash
+DIAG_TRIGGER_SECRET=*** npm run ops:db:migrate:remote
+# optional host override
+DIAG_TRIGGER_SECRET=*** npm run ops:db:migrate:remote -- --host https://<your-host>
+```
+
 4. Re-run diagnostics and confirm all probes are `ok: true`.
 

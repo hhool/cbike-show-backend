@@ -84,4 +84,12 @@ curl -s -X POST -H "x-diag-secret: $DIAG_TRIGGER_SECRET" \
 	"https://<your-host>/api/ops/db-migrate?action=migrate"
 ```
 
+也可以一条命令串行执行“诊断 -> 迁移 -> 复核”：
+
+```bash
+DIAG_TRIGGER_SECRET=*** npm run ops:db:migrate:remote
+# 可选：覆盖 host
+DIAG_TRIGGER_SECRET=*** npm run ops:db:migrate:remote -- --host https://<your-host>
+```
+
 4. 再次执行诊断，确认 probes 全部 `ok: true`。

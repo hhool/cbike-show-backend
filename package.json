@@ -29,6 +29,7 @@
     "ops:preview:media-r2-keys": "./scripts/preview-media-r2-keys.sh",
     "ops:preview:media-r2-keys:like": "./scripts/preview-media-r2-keys.sh --like",
     "ops:verify:media-r2-prefix": "./scripts/verify-media-r2-prefix.sh",
+    "ops:db:migrate:remote": "./scripts/ops-db-migrate-remote.sh",
     "payload:types": "payload generate:types",
     "payload:importmap": "payload generate:importmap"
   },
