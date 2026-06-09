@@ -148,7 +148,7 @@ export default async function BrandsPage({ searchParams }: BrandsPageProps) {
                   <li key={brand.id} style={{ marginBottom: 8 }}>
                     <strong>{brand.name || "-"}</strong>
                     <span style={{ marginLeft: 8, color: "#5d6d77" }}>#{brand.priorityScore || 0}</span>
-                    <p style={{ margin: "4px 0 0", color: "#5d6d77" }}>{brand.intro || "-"}</p>
+                    {brand.intro && <p style={{ margin: "4px 0 0", color: "#5d6d77" }}>{brand.intro}</p>}
                     {brand.slug && (
                       <p style={{ margin: "4px 0 0" }}>
                         <Link href={`/brands/${brand.slug}?lang=${locale}`} style={{ color: "#1c5b88", textDecoration: "none" }}>

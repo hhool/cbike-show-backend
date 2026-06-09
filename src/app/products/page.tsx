@@ -11,6 +11,11 @@ function omitStatusFilter(where: Record<string, unknown>): Record<string, unknow
   return next;
 }
 
+function shouldRetryWithoutLocale(error: unknown): boolean {
+  const message = error instanceof Error ? error.message : String(error || "");
+  return /_locales|no such table|relation .* does not exist|failed query/i.test(message);
+}
+
 export default async function ProductsPage({ searchParams }: ProductsPageProps) {
   const params = (await searchParams) || {};
   const locale = pickLocale(params.lang);
@@ -27,6 +32,24 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
       return { docs: Array.isArray(result.docs) ? (result.docs as any[]) : [] };
     } catch (error) {
       console.error(`[products-page] failed to query ${label}`, error);
+
+      if (shouldRetryWithoutLocale(error)) {
+        try {
+          const fallbackArgs: Parameters<typeof payload.find>[0] = {
+            ...args,
+            locale: undefined,
+            depth: 0,
+            fallbackLocale: false,
+          };
+          const fallbackResult = await payload.find(fallbackArgs);
+          const docs = Array.isArray(fallbackResult.docs) ? (fallbackResult.docs as any[]) : [];
+          console.warn(`[products-page] fallback query without locale succeeded for ${label}`);
+          return { docs };
+        } catch (fallbackError) {
+          console.error(`[products-page] fallback query without locale failed for ${label}`, fallbackError);
+        }
+      }
+
       return { docs: [] };
     }
   };
@@ -39,6 +62,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
       pagination: false,
       where: { region: { equals: region } },
       depth: 0,
+      select: { id: true },
     }, "brands-by-region");
     brandIdsByRegion = brandResult.docs.map((b: any) => b.id).filter((id: unknown): id is number => typeof id === "number");
   }
@@ -52,6 +76,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
       locale,
       where: { slug: { equals: brandSlug } },
       depth: 0,
+      select: { id: true, name: true, slug: true },
     }, "selected-brand");
     selectedBrand = selectedBrandResult.docs[0] || null;
   }
@@ -65,6 +90,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
       locale,
       where: { slug: { equals: categorySlug } },
       depth: 0,
+      select: { id: true, name: true, slug: true },
     }, "selected-category");
     selectedCategory = selectedCategoryResult.docs[0] || null;
   }
@@ -98,8 +124,8 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
     collection: "brands",
     limit: 8,
     pagination: false,
-    locale,
     sort: "-priorityScore",
+    select: { id: true, name: true, slug: true },
     ...(region ? { where: { region: { equals: region } } } : {}),
     depth: 0,
   }, "quick-brands");
@@ -109,12 +135,35 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
     limit: 12,
     sort: "-updatedAt",
     locale,
-    depth: 1,
+    depth: 0,
+    select: {
+      id: true,
+      slug: true,
+      modelName: true,
+      summary: true,
+      msrpCNY: true,
+      brand: true,
+    },
     where: whereClause,
   };
 
   let productsResult = await safeFind(productsQueryArgs, "products-list");
   let usedStatusFallback = false;
+  let usedLocaleFallback = false;
+
+  if (productsResult.docs.length === 0) {
+    const productsNoLocaleResult = await safeFind(
+      {
+        ...productsQueryArgs,
+        locale: undefined,
+      },
+      "products-list-no-locale",
+    );
+    if (productsNoLocaleResult.docs.length > 0) {
+      productsResult = productsNoLocaleResult;
+      usedLocaleFallback = true;
+    }
+  }
 
   if (productsResult.docs.length === 0) {
     const fallbackWhere = omitStatusFilter(whereClause);
@@ -123,6 +172,49 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
       where: fallbackWhere,
     }, "products-list-without-status");
     usedStatusFallback = productsResult.docs.length > 0;
+
+    if (!usedStatusFallback && productsResult.docs.length === 0) {
+      const productsNoLocaleNoStatusResult = await safeFind(
+        {
+          ...productsQueryArgs,
+          locale: undefined,
+          where: fallbackWhere,
+        },
+        "products-list-no-locale-without-status",
+      );
+      if (productsNoLocaleNoStatusResult.docs.length > 0) {
+        productsResult = productsNoLocaleNoStatusResult;
+        usedStatusFallback = true;
+        usedLocaleFallback = true;
+      }
+    }
+  }
+
+  const brandIdSet = new Set(
+    productsResult.docs
+      .map((item: any) => (typeof item?.brand === "number" ? item.brand : null))
+      .filter((id: unknown): id is number => typeof id === "number"),
+  );
+
+  const productBrandMap = new Map<number, string>();
+  if (brandIdSet.size > 0) {
+    const productBrandsResult = await safeFind(
+      {
+        collection: "brands",
+        limit: 200,
+        pagination: false,
+        depth: 0,
+        select: { id: true, name: true },
+        where: { id: { in: Array.from(brandIdSet) } },
+      },
+      "products-brand-map",
+    );
+
+    for (const brand of productBrandsResult.docs) {
+      if (typeof brand?.id === "number") {
+        productBrandMap.set(brand.id, brand?.name || "-");
+      }
+    }
   }
 
   const title = page?.heroTitle || page?.title || (locale === "en" ? "Products" : "产品库");
@@ -216,7 +308,7 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
             <article key={item.id} style={{ border: "1px solid #e4ebf0", borderRadius: 12, padding: 14, background: "#fff" }}>
               <h2 style={{ margin: "0 0 8px", fontSize: 20 }}>{item.modelName}</h2>
               <p style={{ margin: "0 0 8px", color: "#495a65" }}>
-                {(item.brand && typeof item.brand === "object" ? item.brand.name : "-") || "-"}
+                {(typeof item.brand === "number" ? productBrandMap.get(item.brand) : null) || "-"}
               </p>
               <p style={{ margin: "0 0 8px", color: "#5d6d77" }}>{item.summary || "-"}</p>
               <p style={{ margin: 0, fontWeight: 700, color: "#17486b" }}>
@@ -243,6 +335,13 @@ export default async function ProductsPage({ searchParams }: ProductsPageProps) 
           {locale === "en"
             ? "Compatibility mode: displaying records without publish-status filter. Please run database migrations to restore strict published filtering."
             : "兼容模式：当前未按发布状态过滤展示数据。请尽快执行数据库迁移，以恢复严格的“已发布”过滤。"}
+        </p>
+      )}
+      {usedLocaleFallback && (
+        <p style={{ marginTop: 10, color: "#8a5b00", fontSize: 13 }}>
+          {locale === "en"
+            ? "Compatibility mode: displaying records via locale-safe query fallback. Please run database migrations to restore localized queries."
+            : "兼容模式：当前通过 locale 安全降级查询展示数据。请尽快执行数据库迁移，以恢复本地化查询。"}
         </p>
       )}
     </main>
