@@ -71,15 +71,19 @@ call_json() {
 echo "[ops-db-migrate-remote] Host: $HOST"
 echo ""
 
-echo "== Step 1/3: Runtime diagnose (before migrate) =="
+echo "== Step 1/4: Runtime diagnose (before) =="
 call_json "GET" "$HOST/api/diag-runtime"
 echo ""
 
-echo "== Step 2/3: Trigger migrate =="
+echo "== Step 2/4: Trigger schema DDL init (CREATE TABLE IF NOT EXISTS for locale/status tables) =="
+call_json "POST" "$HOST/api/ops/db-schema-init"
+echo ""
+
+echo "== Step 3/4: Trigger migrate (runs any pending migration files) =="
 call_json "POST" "$HOST/api/ops/db-migrate?action=migrate"
 echo ""
 
-echo "== Step 3/3: Runtime diagnose (after migrate) =="
+echo "== Step 4/4: Runtime diagnose (after) =="
 call_json "GET" "$HOST/api/diag-runtime"
 echo ""
 
