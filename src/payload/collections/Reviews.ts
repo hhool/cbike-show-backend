@@ -74,6 +74,24 @@ function canTransitionStatus(from: ReviewStatus, to: ReviewStatus): boolean {
   return false;
 }
 
+function formatMissingDetails(
+  missingByLocale: Array<{ locale: "zh" | "en"; missing: Array<"title" | "summary" | "body"> }>,
+  language: "zh" | "en",
+): string {
+  if (language === "zh") {
+    return missingByLocale
+      .map((entry) => {
+        const fields = entry.missing.map((field) => `${fieldLabel(field, "zh")}(${field})`).join("/");
+        return `${localeLabel(entry.locale, "zh")}[${fields}]`;
+      })
+      .join("，");
+  }
+
+  return missingByLocale
+    .map((entry) => `${localeLabel(entry.locale, "en")}[${entry.missing.map((field) => fieldLabel(field, "en")).join("/")}]`)
+    .join(", ");
+}
+
 export const Reviews: CollectionConfig = {
   slug: "reviews",
   labels: { singular: { en: "Review", zh: "评测" }, plural: { en: "Reviews", zh: "评测" } },
@@ -200,8 +218,6 @@ export const Reviews: CollectionConfig = {
           });
         }
 
-        if (nextStatus !== "published") return nextData;
-
         const locales: Array<"zh" | "en"> = ["zh", "en"];
         const activeLocale = (req?.locale === "zh" || req?.locale === "en") ? req.locale : null;
 
@@ -233,30 +249,67 @@ export const Reviews: CollectionConfig = {
           }
         }
 
+        // Stage gate 1: entering compliance requires complete Chinese copy.
+        if (nextStatus === "compliance") {
+          const missingZh = getMissingFields(localeSnapshots.zh);
+          if (missingZh.length > 0) {
+            const zhFields = missingZh.map((field) => `${fieldLabel(field, "zh")}(${field})`).join("/");
+            throw new ValidationError({
+              collection: "reviews",
+              errors: [
+                {
+                  path: "status",
+                  message: `进入合规前请先补齐中文文案：${zhFields}。Before moving to compliance, complete Chinese copy: zh[${missingZh.join("/")}].`,
+                },
+              ],
+              req,
+            });
+          }
+          return nextData;
+        }
+
+        // Stage gate 2: entering chief requires both zh and en complete.
+        if (nextStatus === "chief") {
+          const missingForChief = locales
+            .map((locale) => ({ locale, missing: getMissingFields(localeSnapshots[locale]) }))
+            .filter((entry) => entry.missing.length > 0);
+
+          if (missingForChief.length > 0) {
+            throw new ValidationError({
+              collection: "reviews",
+              errors: [
+                {
+                  path: "status",
+                  message: `进入主编终审前需补齐双语文案：${formatMissingDetails(missingForChief, "zh")}。Before moving to chief review, complete both locales: ${formatMissingDetails(missingForChief, "en")}.`,
+                },
+              ],
+              req,
+            });
+          }
+          return nextData;
+        }
+
+        if (nextStatus !== "published") return nextData;
+
         const missingByLocale = locales
           .map((locale) => ({ locale, missing: getMissingFields(localeSnapshots[locale]) }))
           .filter((entry) => entry.missing.length > 0);
 
         if (missingByLocale.length > 0) {
-          const zhDetails = missingByLocale
-            .map((entry) => {
-              const fields = entry.missing.map((field) => `${fieldLabel(field, "zh")}(${field})`).join("/");
-              return `${localeLabel(entry.locale, "zh")}[${fields}]`;
-            })
-            .join("，");
-          const enDetails = missingByLocale
-            .map((entry) => `${localeLabel(entry.locale, "en")}[${entry.missing.map((field) => fieldLabel(field, "en")).join("/")}]`)
-            .join(", ");
           throw new ValidationError({
             collection: "reviews",
             errors: [
               {
                 path: "status",
-                message: `发布已阻止：以下语言字段未完整 ${zhDetails}。Publishing blocked: missing localized fields ${enDetails}.`,
+                message: `发布已阻止：以下语言字段未完整 ${formatMissingDetails(missingByLocale, "zh")}。Publishing blocked: missing localized fields ${formatMissingDetails(missingByLocale, "en")}.`,
               },
             ],
             req,
           });
+        }
+
+        if (!nextData?.publishedAt && !originalDoc?.publishedAt) {
+          nextData.publishedAt = new Date().toISOString();
         }
 
         return nextData;
