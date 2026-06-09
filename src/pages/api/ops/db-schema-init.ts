@@ -208,6 +208,20 @@ const DDL_STATEMENTS = [
     "updated_at"      timestamp with time zone NOT NULL DEFAULT now()
   )`,
   `CREATE INDEX IF NOT EXISTS "_site_pages_v_parent_id_idx" ON "_site_pages_v" ("parent_id")`,
+
+  // Reset stale admin list/filter preferences that can keep specific collection pages blank
+  // even when collection APIs are healthy (safe to rerun in production).
+  `DO $$
+   BEGIN
+     IF EXISTS (
+       SELECT 1
+       FROM information_schema.tables
+       WHERE table_schema='public' AND table_name='payload_preferences'
+     ) THEN
+       DELETE FROM "payload_preferences";
+     END IF;
+   END
+   $$`,
 ];
 
 export default async function handler(
