@@ -12,6 +12,8 @@ const SQLS = [
   `UPDATE "news_regions" SET "parent_id" = "_parent_id" WHERE "parent_id" IS NULL AND "_parent_id" IS NOT NULL`,
   `UPDATE "news_regions" SET "order" = "_order" WHERE "order" IS NULL AND "_order" IS NOT NULL`,
   `UPDATE "news_regions" SET "order" = 0 WHERE "order" IS NULL`,
+  `ALTER TABLE "news_regions" ALTER COLUMN "_parent_id" DROP NOT NULL`,
+  `ALTER TABLE "news_regions" ALTER COLUMN "_order" DROP NOT NULL`,
   `CREATE INDEX IF NOT EXISTS "news_regions_parent_id_idx" ON "news_regions" ("parent_id")`,
   `CREATE INDEX IF NOT EXISTS "news_regions_order_idx" ON "news_regions" ("order")`
 ];
