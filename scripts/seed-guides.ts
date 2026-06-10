@@ -507,22 +507,30 @@ async function ensureGuideCoverMedia(seed: GuideSeed, token: string): Promise<nu
     JSON.stringify({
       alt: `Guide cover for ${slug}`,
       credit: "Local bootstrap asset",
-      entityType: "guide",
+      entityType: "common",
       entityId: slug,
     })
   );
   form.set("file", new Blob([buffer], { type: toMediaMimeType(sourceFile) }), targetFilename);
 
-  const created = unwrapDoc(
-    await request(
-      "/api/media",
-      {
-        method: "POST",
-        body: form,
-      },
-      token
-    )
-  );
+  let created: any = null;
+  try {
+    created = unwrapDoc(
+      await request(
+        "/api/media",
+        {
+          method: "POST",
+          body: form,
+        },
+        token
+      )
+    );
+  } catch {
+    // Media upload failed (e.g. Vercel R2 issue); fall back to existing media.
+    const fallbackId = await findLatestMediaId(token);
+    guideCoverMediaIdCache.set(slug, fallbackId);
+    return fallbackId;
+  }
 
   const createdId = Number(created?.id);
   if (!Number.isFinite(createdId)) {
@@ -577,11 +585,11 @@ async function ensureGuideDraft(seed: GuideSeed, token: string): Promise<EnsureG
   }
 
   if (existing?.id) {
-    await request(`/api/guides/${existing.id}?locale=zh`, { method: "PATCH", body: JSON.stringify(baseBody) }, token);
+    await request(`/api/guides/${existing.id}`, { method: "PATCH", body: JSON.stringify(baseBody) }, token);
     return { id: String(existing.id), hasCover };
   }
 
-  const created = unwrapDoc(await request("/api/guides?locale=zh", { method: "POST", body: JSON.stringify(baseBody) }, token));
+  const created = unwrapDoc(await request("/api/guides", { method: "POST", body: JSON.stringify(baseBody) }, token));
   const id = String(created.id || "");
   if (!id) throw new Error(`Failed to create guide draft: ${seed.slug}`);
   return { id, hasCover };
@@ -589,7 +597,7 @@ async function ensureGuideDraft(seed: GuideSeed, token: string): Promise<EnsureG
 
 async function patchEnglishLocale(id: string, seed: GuideSeed, token: string): Promise<void> {
   await request(
-    `/api/guides/${id}?locale=en`,
+    `/api/guides/${id}`,
     {
       method: "PATCH",
       body: JSON.stringify({
@@ -603,13 +611,13 @@ async function patchEnglishLocale(id: string, seed: GuideSeed, token: string): P
 }
 
 async function readCurrentGuideStatus(id: string, token: string): Promise<string> {
-  const doc = unwrapDoc(await request(`/api/guides/${id}?locale=zh`, undefined, token));
+  const doc = unwrapDoc(await request(`/api/guides/${id}`, undefined, token));
   return String(doc?.status || "draft").trim() || "draft";
 }
 
 async function patchGuideStatus(id: string, body: Record<string, unknown>, token: string): Promise<void> {
   await request(
-    `/api/guides/${id}?locale=zh`,
+    `/api/guides/${id}`,
     {
       method: "PATCH",
       body: JSON.stringify(body),
@@ -623,7 +631,7 @@ async function transitionGuideToPublished(id: string, publishedAt: string, token
 
   if (initialStatus === "published") {
     await request(
-      `/api/guides/${id}?locale=zh`,
+      `/api/guides/${id}`,
       {
         method: "PATCH",
         body: JSON.stringify({
