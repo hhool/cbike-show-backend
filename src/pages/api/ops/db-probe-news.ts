@@ -5,14 +5,37 @@ import config from "@payload-config";
 const HEADER = "x-diag-secret";
 
 const toSafeError = (error: unknown) => {
+  const extractCause = (candidate: any) => {
+    if (!candidate || typeof candidate !== "object") return undefined;
+    return {
+      name: typeof candidate.name === "string" ? candidate.name : undefined,
+      message: typeof candidate.message === "string" ? candidate.message : undefined,
+      code: typeof candidate.code === "string" ? candidate.code : undefined,
+      detail: typeof candidate.detail === "string" ? candidate.detail : undefined,
+      hint: typeof candidate.hint === "string" ? candidate.hint : undefined,
+      routine: typeof candidate.routine === "string" ? candidate.routine : undefined,
+      position: typeof candidate.position === "string" ? candidate.position : undefined,
+    };
+  };
+
   if (error instanceof Error) {
-    const candidate = error as Error & { code?: string; detail?: string; hint?: string };
+    const candidate = error as Error & {
+      code?: string;
+      detail?: string;
+      hint?: string;
+      routine?: string;
+      position?: string;
+      cause?: unknown;
+    };
     return {
       name: candidate.name,
       message: candidate.message,
       code: typeof candidate.code === "string" ? candidate.code : undefined,
       detail: typeof candidate.detail === "string" ? candidate.detail : undefined,
       hint: typeof candidate.hint === "string" ? candidate.hint : undefined,
+      routine: typeof candidate.routine === "string" ? candidate.routine : undefined,
+      position: typeof candidate.position === "string" ? candidate.position : undefined,
+      cause: extractCause(candidate.cause as any),
       stack: (candidate.stack || "").split("\n").slice(0, 8),
     };
   }
