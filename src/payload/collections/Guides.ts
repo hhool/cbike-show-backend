@@ -242,7 +242,7 @@ export const Guides: CollectionConfig = {
   admin: {
     useAsTitle: 'titleEn',
     defaultColumns: ['titleEn', 'category', 'status', 'isPinned', 'publishedAt', 'updatedAt'],
-    group: { zh: '内容管理', en: 'Content' },
+    group: { zh: 'Editor', en: 'Editor' },
     description: {
       zh: '选购指南：采用与全球资讯一致的三审流转，发布前必须补齐中英标题/摘要/正文并上传 cover 封面。',
       en: 'Buying guides use the same editorial workflow as News: compliance -> chief -> published, with bilingual completeness and cover required before publishing.'
@@ -334,8 +334,8 @@ export const Guides: CollectionConfig = {
       admin: {
         position: 'sidebar',
         description: {
-          zh: '支持自由增删分类（例如：beginner、scenario）。建议使用短英文 slug，便于前台过滤与映射。',
-          en: 'Categories are free-form and can be added/removed. Prefer short slug-style values (for example: beginner, scenario) for stable frontend filtering/mapping.'
+          zh: '填写“选购分类”里的稳定键（例如：beginner、scenario），用于前台过滤与映射。',
+          en: 'Use the stable key from Buying Categories (for example: beginner, scenario) for frontend filtering/mapping.'
         }
       }
     },

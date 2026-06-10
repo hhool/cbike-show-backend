@@ -19,6 +19,7 @@ import { Products } from "./src/payload/collections/Products";
 import { Reviews } from "./src/payload/collections/Reviews";
 import { News } from "./src/payload/collections/News";
 import { NewsCategories } from "./src/payload/collections/NewsCategories";
+import { GuideCategories } from "./src/payload/collections/GuideCategories";
 import { Guides } from "./src/payload/collections/Guides";
 import { SitePages } from "./src/payload/collections/SitePages";
 import { LocaleEntries } from "./src/payload/collections/LocaleEntries";
@@ -183,6 +184,7 @@ export default buildConfig({
     Reviews,
     NewsCategories,
     News,
+    GuideCategories,
     Guides,
     SitePages,
     LocaleEntries
