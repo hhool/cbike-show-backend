@@ -424,12 +424,21 @@ const DDL_STATEMENTS = [
   // news_regions (hasMany select)
   `CREATE TABLE IF NOT EXISTS "news_regions" (
     "id"         serial PRIMARY KEY NOT NULL,
-    "_order"     integer NOT NULL DEFAULT 0,
-    "_parent_id" integer NOT NULL REFERENCES "news"("id") ON DELETE CASCADE,
+    "order"      integer NOT NULL DEFAULT 0,
+    "parent_id"  integer NOT NULL REFERENCES "news"("id") ON DELETE CASCADE,
     "value"      varchar
   )`,
-  `CREATE INDEX IF NOT EXISTS "news_regions_order_idx" ON "news_regions" ("_order")`,
-  `CREATE INDEX IF NOT EXISTS "news_regions_parent_id_idx" ON "news_regions" ("_parent_id")`,
+  `CREATE INDEX IF NOT EXISTS "news_regions_order_idx" ON "news_regions" ("order")`,
+  `CREATE INDEX IF NOT EXISTS "news_regions_parent_id_idx" ON "news_regions" ("parent_id")`,
+
+  // Compatibility for early schema where news_regions was created with _parent_id/_order
+  `ALTER TABLE "news_regions" ADD COLUMN IF NOT EXISTS "parent_id" integer`,
+  `ALTER TABLE "news_regions" ADD COLUMN IF NOT EXISTS "order" integer`,
+  `UPDATE "news_regions" SET "parent_id" = "_parent_id" WHERE "parent_id" IS NULL AND "_parent_id" IS NOT NULL`,
+  `UPDATE "news_regions" SET "order" = "_order" WHERE "order" IS NULL AND "_order" IS NOT NULL`,
+  `UPDATE "news_regions" SET "order" = 0 WHERE "order" IS NULL`,
+  `CREATE INDEX IF NOT EXISTS "news_regions_parent_id_idx" ON "news_regions" ("parent_id")`,
+  `CREATE INDEX IF NOT EXISTS "news_regions_order_idx" ON "news_regions" ("order")`,
 
   // Register new collections in payload_locked_documents_rels
   `ALTER TABLE "payload_locked_documents_rels"
