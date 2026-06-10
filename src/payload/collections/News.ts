@@ -73,6 +73,45 @@ function mergeLocaleDraft(base: Partial<LocalizedSnapshot> | null, data: any): L
   };
 }
 
+function pickMediaVariantUrl(cover: any, variant: "thumb" | "card" | "hero" | "original"): string {
+  if (!cover || typeof cover !== "object") return "";
+
+  const bySize = String(cover?.sizes?.[variant]?.url ?? "").trim();
+  if (bySize) return bySize;
+
+  const storageKeyMap: Record<string, string> = {
+    thumb: "storageKeyThumb",
+    card: "storageKeyCard",
+    hero: "storageKeyHero",
+    original: "storageKeyOriginal",
+  };
+
+  const byStorage = String(cover?.[storageKeyMap[variant]] ?? "").trim();
+  if (byStorage) return byStorage;
+
+  const fallback = String(cover?.url ?? "").trim();
+  return fallback;
+}
+
+function deriveNewsThumbnail(doc: any): any {
+  if (!doc || typeof doc !== "object") return doc;
+
+  const cover = doc.cover;
+  if (!cover || typeof cover !== "object") {
+    doc.thumbnail = null;
+    return doc;
+  }
+
+  doc.thumbnail = {
+    thumb: pickMediaVariantUrl(cover, "thumb"),
+    card: pickMediaVariantUrl(cover, "card"),
+    hero: pickMediaVariantUrl(cover, "hero"),
+    original: pickMediaVariantUrl(cover, "original"),
+  };
+
+  return doc;
+}
+
 function isTransitionAllowed(from: NewsStatus, to: NewsStatus): boolean {
   if (from === to) return true;
   if (to === "draft") return true;
@@ -144,7 +183,10 @@ export const News: CollectionConfig = {
       name: "cover",
       type: "upload",
       relationTo: "media",
-      label: { en: "Cover", zh: "封面图" }
+      label: { en: "Cover", zh: "封面图" },
+      admin: {
+        description: "用于前台列表缩略图与详情头图。建议上传横版封面（至少 1200x800）。"
+      }
     },
     {
       name: "summary",
@@ -320,6 +362,23 @@ export const News: CollectionConfig = {
         nextData.status = requestedStatus;
         nextData._status = requestedStatus;
 
+        if (statusChanged && requestedStatus === "published") {
+          const coverValue = nextData?.cover ?? originalDoc?.cover;
+          if (!coverValue) {
+            throw new ValidationError({
+              collection: "news",
+              errors: [
+                {
+                  path: "cover",
+                  message:
+                    "发布前必须设置封面图（Cover）以支持前台缩略图渲染。Cover image is required when publishing to ensure thumbnail rendering on the frontend."
+                }
+              ],
+              req
+            });
+          }
+        }
+
         if (statusChanged && requestedStatus === "draft" && currentStatus !== "draft") {
           const transitionNote = String(nextData.transitionNote ?? "").trim();
           if (!transitionNote) {
@@ -402,6 +461,9 @@ export const News: CollectionConfig = {
 
         return nextData;
       }
+    ],
+    afterRead: [
+      async ({ doc }) => deriveNewsThumbnail(doc)
     ]
   },
   timestamps: true

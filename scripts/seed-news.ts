@@ -9,6 +9,9 @@
 const API_BASE = (process.env.API_BASE || "http://localhost:3000").replace(/\/$/, "");
 const ADMIN_EMAIL = process.env.SEED_ADMIN_EMAIL || "admin@cbike-lab.example";
 const ADMIN_PASSWORD = process.env.SEED_ADMIN_PASSWORD || "Admin@2026!";
+const DEFAULT_NEWS_COVER_FILENAME = (process.env.SEED_NEWS_COVER_FILENAME || "").trim();
+
+let fallbackMediaIdCache: number | null | undefined;
 
 type NewsSeed = {
   slug: string;
@@ -26,6 +29,7 @@ type NewsSeed = {
   pinWeight?: number;
   isAlert?: boolean;
   alertLevel?: "notice" | "warning" | "critical";
+  coverFilename?: string;
   publishedAt: string;
 };
 
@@ -123,6 +127,118 @@ const NEWS_SEEDS: NewsSeed[] = [
     sourceUrl: "https://example.com/editorial/suspension-explainer",
     regions: ["global"],
     publishedAt: "2026-06-07T05:00:00.000Z"
+  },
+  {
+    slug: "bugaboo-dragonfly-gen2-city-commute",
+    categoryKey: "new",
+    titleZh: "Bugaboo 推出 Dragonfly 第二代，主打城市通勤",
+    titleEn: "Bugaboo Launches Dragonfly Gen 2 for City Commuting",
+    summaryZh: "重量降至 7.5kg，标配自立收车，重点强化地铁/电梯通勤场景体验。",
+    summaryEn: "Weight is reduced to 7.5kg with standard self-standing fold, optimized for metro and elevator commuting scenarios.",
+    bodyZh: [
+      "Dragonfly 第二代将整车重量控制在 7.5kg 左右，并延续了单手收车的产品定位。",
+      "新版本重点优化了扶手结构和轮组阻尼，在城市路面与商场铺装环境中的操控更稳定。",
+      "从渠道反馈看，这一代将重点覆盖高频通勤家庭与轻便型换车需求用户。"
+    ],
+    bodyEn: [
+      "Dragonfly Gen 2 keeps total weight around 7.5kg while maintaining one-hand fold positioning.",
+      "The update focuses on handlebar structure and wheel damping for more stable control on urban roads and indoor pavement.",
+      "Channel feedback suggests this generation will target high-frequency commuting families and users switching to lighter models."
+    ],
+    sourceName: "Brand Release",
+    sourceUrl: "https://example.com/brand/dragonfly-gen2",
+    regions: ["global"],
+    publishedAt: "2026-06-06T05:00:00.000Z"
+  },
+  {
+    slug: "stokke-sustainable-supply-chain-white-paper",
+    categoryKey: "brand",
+    titleZh: "Stokke 发布全球可持续供应链白皮书",
+    titleEn: "Stokke Publishes Global Sustainable Supply-Chain White Paper",
+    summaryZh: "品牌提出 2030 前实现 100% 可回收材料目标，并公布阶段性供应链改造路径。",
+    summaryEn: "The brand announced a 2030 target of 100% recyclable materials and disclosed a staged supply-chain transformation plan.",
+    bodyZh: [
+      "白皮书披露了从原材料采购到包装环节的减排路线，重点推进可回收材质替代。",
+      "品牌将优先在欧洲与北美市场导入新版供应规范，并同步升级工厂审核标准。",
+      "对于上游零部件供应商而言，材料追溯与认证合规将成为后续合作的基础门槛。"
+    ],
+    bodyEn: [
+      "The white paper outlines an emissions-reduction roadmap from raw-material sourcing to packaging, with priority on recyclable material replacement.",
+      "The brand will first roll out the new supply standards in Europe and North America, while tightening factory audit requirements.",
+      "For upstream component suppliers, material traceability and certification compliance will become baseline requirements for future cooperation."
+    ],
+    sourceName: "Brand White Paper",
+    sourceUrl: "https://example.com/brand/stokke-sustainability",
+    regions: ["europe", "north_america"],
+    publishedAt: "2026-06-05T05:00:00.000Z"
+  },
+  {
+    slug: "astm-f833-2026-update-interpretation",
+    categoryKey: "compliance",
+    titleZh: "美国 ASTM F833 推车标准 2026 版变更解读",
+    titleEn: "Interpretation of the 2026 ASTM F833 Stroller Standard Updates",
+    summaryZh: "新版增加侧翻测试与小部件风险验证要求，测试机构建议提前安排样机复测。",
+    summaryEn: "The update introduces side-tip and small-parts risk requirements, and labs recommend scheduling prototype retests in advance.",
+    bodyZh: [
+      "ASTM F833 2026 版对稳定性测试工况进行了扩展，强调极限姿态下的整车安全边界。",
+      "小部件项目新增了更严格的拆解与拉力验证，覆盖高频接触区域零件。",
+      "出口北美的品牌建议提前完成设计复核与测试预约，避免上市节奏受阻。"
+    ],
+    bodyEn: [
+      "ASTM F833:2026 extends stability test scenarios and emphasizes safety limits under extreme positions.",
+      "The small-parts section introduces stricter disassembly and pull-force validation for frequently touched components.",
+      "Brands exporting to North America should complete design review and testing bookings early to avoid launch delays."
+    ],
+    sourceName: "ASTM",
+    sourceUrl: "https://www.astm.org/",
+    regions: ["north_america"],
+    publishedAt: "2026-06-03T05:00:00.000Z"
+  },
+  {
+    slug: "balance-bike-steering-bolt-fracture-summary",
+    categoryKey: "warn",
+    titleZh: "某网红平衡车把立螺栓断裂事件汇总",
+    titleEn: "Summary of Steering-Bolt Fractures in a Viral Balance-Bike Line",
+    summaryZh: "事件涉及 3 个跨境平台同代工产品，建议商家立即核查批次并更新风险提示。",
+    summaryEn: "The incident affects OEM-identical products on three cross-border platforms, and sellers are advised to verify batches and update risk notices immediately.",
+    bodyZh: [
+      "近期多起用户反馈显示，部分平衡车在高频震动后出现把立螺栓疲劳断裂。",
+      "问题批次主要集中在同一代工链路，不同品牌贴牌产品均有涉及。",
+      "平台卖家应尽快完善召回沟通、售后替换与停用提示，降低进一步风险扩散。"
+    ],
+    bodyEn: [
+      "Recent user reports show fatigue fractures on steering bolts after repeated vibration in certain balance-bike units.",
+      "Affected batches are concentrated in the same OEM chain and appear across multiple branded SKUs.",
+      "Marketplace sellers should quickly implement recall communication, replacement handling, and stop-use notices to reduce further risk spread."
+    ],
+    sourceName: "Market Safety Monitoring",
+    sourceUrl: "https://example.com/safety/balance-bike-bolt",
+    regions: ["global"],
+    isAlert: true,
+    alertLevel: "warning",
+    publishedAt: "2026-06-01T05:00:00.000Z"
+  },
+  {
+    slug: "cross-border-middle-east-growth-q1",
+    categoryKey: "industry",
+    titleZh: "跨境电商童车类目 Q1 增速：中东 +47%",
+    titleEn: "Cross-Border Stroller Category Growth in Q1: Middle East +47%",
+    summaryZh: "沙特与阿联酋需求快速提升，轻便型与中端价位产品成为主要增量来源。",
+    summaryEn: "Demand in Saudi Arabia and the UAE grew rapidly, with lightweight and mid-price products driving most of the increment.",
+    bodyZh: [
+      "Q1 渠道数据显示，中东市场在童车类目保持高于全球平均的增长速度。",
+      "用户偏好集中在轻便折叠、耐热材质与快速售后响应能力。",
+      "品牌在进入该区域时应重点关注本地认证、仓配时效与多语言客服能力。"
+    ],
+    bodyEn: [
+      "Q1 channel data shows the Middle East stroller segment growing faster than the global average.",
+      "User preference is concentrated on lightweight folding, heat-resistant materials, and fast after-sales response.",
+      "Brands entering this region should prioritize local compliance, fulfillment speed, and multilingual customer support."
+    ],
+    sourceName: "Cross-border Channel Report",
+    sourceUrl: "https://example.com/data/middle-east-q1",
+    regions: ["middle_east"],
+    publishedAt: "2026-05-30T05:00:00.000Z"
   }
 ];
 
@@ -205,11 +321,44 @@ async function findCategoryIdByKey(key: string, token: string): Promise<number> 
   return id;
 }
 
+async function findMediaIdByFilename(filename: string, token: string): Promise<number | null> {
+  const name = String(filename || "").trim();
+  if (!name) return null;
+
+  const query = `/api/media?limit=1&where[filename][equals]=${encodeURIComponent(name)}`;
+  const data = await request(query, undefined, token);
+  const doc = Array.isArray(data?.docs) ? data.docs[0] : null;
+  const id = Number(doc?.id);
+  return Number.isFinite(id) ? id : null;
+}
+
+async function findLatestMediaId(token: string): Promise<number | null> {
+  if (fallbackMediaIdCache !== undefined) return fallbackMediaIdCache;
+
+  const data = await request(`/api/media?limit=1&sort=-createdAt`, undefined, token);
+  const doc = Array.isArray(data?.docs) ? data.docs[0] : null;
+  const id = Number(doc?.id);
+  fallbackMediaIdCache = Number.isFinite(id) ? id : null;
+  return fallbackMediaIdCache;
+}
+
 async function ensureNewsDraft(seed: NewsSeed, categoryId: number, token: string): Promise<string> {
   const existing = await findBySlug("news", seed.slug, token);
+  const requestedCoverFilename = (seed.coverFilename || DEFAULT_NEWS_COVER_FILENAME || "").trim();
+  const explicitCoverId = requestedCoverFilename ? await findMediaIdByFilename(requestedCoverFilename, token) : null;
+  if (requestedCoverFilename && !explicitCoverId) {
+    console.warn(`[seed-news] cover media not found: slug=${seed.slug}, filename=${requestedCoverFilename}`);
+  }
+  const coverId = explicitCoverId || (await findLatestMediaId(token));
+  if (!coverId) {
+    throw new Error(
+      `No media available for news cover (slug=${seed.slug}). Upload at least one media item first or set SEED_NEWS_COVER_FILENAME/coverFilename.`
+    );
+  }
   const baseBody = {
     slug: seed.slug,
     category: categoryId,
+    cover: coverId,
     title: seed.titleZh,
     summary: seed.summaryZh,
     body: lexicalParagraphs(seed.bodyZh),
@@ -249,21 +398,63 @@ async function patchEnglishLocale(id: string, seed: NewsSeed, token: string): Pr
   );
 }
 
+async function readCurrentNewsStatus(id: string, token: string): Promise<string> {
+  const doc = unwrapDoc(await request(`/api/news/${id}?locale=zh`, undefined, token));
+  return String(doc?.status || "draft").trim() || "draft";
+}
+
 async function transitionNewsToPublished(id: string, publishedAt: string, token: string): Promise<void> {
-  await request(`/api/news/${id}?locale=zh`, { method: "PATCH", body: JSON.stringify({ status: "compliance", transitionNote: "Seed transition to compliance" }) }, token);
-  await request(`/api/news/${id}?locale=zh`, { method: "PATCH", body: JSON.stringify({ status: "chief", transitionNote: "Seed transition to chief" }) }, token);
-  await request(
-    `/api/news/${id}?locale=zh`,
-    {
-      method: "PATCH",
-      body: JSON.stringify({
-        status: "published",
-        transitionNote: "Seed publish transition",
-        publishedAt,
-      }),
-    },
-    token
-  );
+  const status = await readCurrentNewsStatus(id, token);
+
+  if (status === "published") {
+    await request(
+      `/api/news/${id}?locale=zh`,
+      {
+        method: "PATCH",
+        body: JSON.stringify({
+          transitionNote: "Seed publish metadata refresh",
+          publishedAt,
+        }),
+      },
+      token
+    );
+    return;
+  }
+
+  if (status === "archived") {
+    await request(
+      `/api/news/${id}?locale=zh`,
+      { method: "PATCH", body: JSON.stringify({ status: "draft", transitionNote: "Seed reopen archived article" }) },
+      token
+    );
+  }
+
+  const latest = await readCurrentNewsStatus(id, token);
+
+  if (latest === "draft") {
+    await request(`/api/news/${id}?locale=zh`, { method: "PATCH", body: JSON.stringify({ status: "compliance", transitionNote: "Seed transition to compliance" }) }, token);
+  }
+
+  const afterCompliance = await readCurrentNewsStatus(id, token);
+  if (afterCompliance === "compliance") {
+    await request(`/api/news/${id}?locale=zh`, { method: "PATCH", body: JSON.stringify({ status: "chief", transitionNote: "Seed transition to chief" }) }, token);
+  }
+
+  const afterChief = await readCurrentNewsStatus(id, token);
+  if (afterChief === "chief") {
+    await request(
+      `/api/news/${id}?locale=zh`,
+      {
+        method: "PATCH",
+        body: JSON.stringify({
+          status: "published",
+          transitionNote: "Seed publish transition",
+          publishedAt,
+        }),
+      },
+      token
+    );
+  }
 }
 
 async function upsertNews(seed: NewsSeed, token: string): Promise<void> {
