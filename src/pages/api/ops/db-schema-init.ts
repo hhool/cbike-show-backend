@@ -339,6 +339,104 @@ const DDL_STATEMENTS = [
    END
    $$`,
 
+  // ── news_categories ─────────────────────────────────────────────────────────
+  `CREATE TABLE IF NOT EXISTS "news_categories" (
+    "id"                 serial PRIMARY KEY NOT NULL,
+    "key"                varchar NOT NULL,
+    "is_system"          boolean DEFAULT false,
+    "is_visible_in_tabs" boolean DEFAULT true,
+    "sort_order"         numeric DEFAULT 100,
+    "style_variant"      varchar,
+    "updated_at"         timestamp with time zone NOT NULL DEFAULT now(),
+    "created_at"         timestamp with time zone NOT NULL DEFAULT now()
+  )`,
+  `CREATE UNIQUE INDEX IF NOT EXISTS "news_categories_key_idx" ON "news_categories" ("key")`,
+  `CREATE INDEX IF NOT EXISTS "news_categories_created_at_idx" ON "news_categories" ("created_at")`,
+
+  `CREATE TABLE IF NOT EXISTS "news_categories_locales" (
+    "id"         serial PRIMARY KEY NOT NULL,
+    "_parent_id" integer NOT NULL REFERENCES "news_categories"("id") ON DELETE CASCADE,
+    "_locale"    varchar(10) NOT NULL,
+    "name"       text,
+    "description" text,
+    CONSTRAINT "news_categories_locales_parent_id_locale_unique" UNIQUE("_parent_id", "_locale")
+  )`,
+  `CREATE INDEX IF NOT EXISTS "news_categories_locales_parent_id_idx" ON "news_categories_locales" ("_parent_id")`,
+
+  // ── news ────────────────────────────────────────────────────────────────────
+  `CREATE TABLE IF NOT EXISTS "news" (
+    "id"               serial PRIMARY KEY NOT NULL,
+    "slug"             varchar NOT NULL,
+    "category_id"      integer REFERENCES "news_categories"("id"),
+    "cover_id"         integer REFERENCES "media"("id"),
+    "source_name"      varchar,
+    "source_url"       varchar,
+    "status"           varchar DEFAULT 'draft',
+    "_status"          varchar DEFAULT 'draft',
+    "transition_note"  text,
+    "scheduled_at"     timestamp with time zone,
+    "published_at"     timestamp with time zone,
+    "expires_at"       timestamp with time zone,
+    "is_pinned"        boolean DEFAULT false,
+    "pin_weight"       numeric DEFAULT 0,
+    "pin_expires_at"   timestamp with time zone,
+    "is_alert"         boolean DEFAULT false,
+    "alert_level"      varchar DEFAULT 'notice',
+    "created_by_id"    integer REFERENCES "users"("id"),
+    "updated_at"       timestamp with time zone NOT NULL DEFAULT now(),
+    "created_at"       timestamp with time zone NOT NULL DEFAULT now()
+  )`,
+  `CREATE UNIQUE INDEX IF NOT EXISTS "news_slug_idx" ON "news" ("slug")`,
+  `CREATE INDEX IF NOT EXISTS "news_created_at_idx" ON "news" ("created_at")`,
+  `CREATE INDEX IF NOT EXISTS "news_category_id_idx" ON "news" ("category_id")`,
+
+  `CREATE TABLE IF NOT EXISTS "news_locales" (
+    "id"                   serial PRIMARY KEY NOT NULL,
+    "_parent_id"           integer NOT NULL REFERENCES "news"("id") ON DELETE CASCADE,
+    "_locale"              varchar(10) NOT NULL,
+    "title"                text,
+    "summary"              text,
+    "body"                 jsonb,
+    "seo_meta_title"       text,
+    "seo_meta_description" text,
+    CONSTRAINT "news_locales_parent_id_locale_unique" UNIQUE("_parent_id", "_locale")
+  )`,
+  `CREATE INDEX IF NOT EXISTS "news_locales_parent_id_idx" ON "news_locales" ("_parent_id")`,
+
+  // news_tags (array field)
+  `CREATE TABLE IF NOT EXISTS "news_tags" (
+    "id"         serial PRIMARY KEY NOT NULL,
+    "_order"     integer NOT NULL DEFAULT 0,
+    "_parent_id" integer NOT NULL REFERENCES "news"("id") ON DELETE CASCADE
+  )`,
+  `CREATE INDEX IF NOT EXISTS "news_tags_order_idx" ON "news_tags" ("_order")`,
+  `CREATE INDEX IF NOT EXISTS "news_tags_parent_id_idx" ON "news_tags" ("_parent_id")`,
+
+  `CREATE TABLE IF NOT EXISTS "news_tags_locales" (
+    "id"         serial PRIMARY KEY NOT NULL,
+    "_parent_id" integer NOT NULL REFERENCES "news_tags"("id") ON DELETE CASCADE,
+    "_locale"    varchar(10) NOT NULL,
+    "name"       text,
+    CONSTRAINT "news_tags_locales_parent_id_locale_unique" UNIQUE("_parent_id", "_locale")
+  )`,
+  `CREATE INDEX IF NOT EXISTS "news_tags_locales_parent_id_idx" ON "news_tags_locales" ("_parent_id")`,
+
+  // news_regions (hasMany select)
+  `CREATE TABLE IF NOT EXISTS "news_regions" (
+    "id"         serial PRIMARY KEY NOT NULL,
+    "_order"     integer NOT NULL DEFAULT 0,
+    "_parent_id" integer NOT NULL REFERENCES "news"("id") ON DELETE CASCADE,
+    "value"      varchar
+  )`,
+  `CREATE INDEX IF NOT EXISTS "news_regions_order_idx" ON "news_regions" ("_order")`,
+  `CREATE INDEX IF NOT EXISTS "news_regions_parent_id_idx" ON "news_regions" ("_parent_id")`,
+
+  // Register new collections in payload_locked_documents_rels
+  `ALTER TABLE "payload_locked_documents_rels"
+   ADD COLUMN IF NOT EXISTS "news_id" integer REFERENCES "news"("id") ON DELETE CASCADE`,
+  `ALTER TABLE "payload_locked_documents_rels"
+   ADD COLUMN IF NOT EXISTS "news_categories_id" integer REFERENCES "news_categories"("id") ON DELETE CASCADE`,
+
   // Reset stale admin list/filter preferences that can keep specific collection pages blank
   // even when collection APIs are healthy (safe to rerun in production).
   `DO $$
