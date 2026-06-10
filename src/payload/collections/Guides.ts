@@ -242,7 +242,7 @@ export const Guides: CollectionConfig = {
   admin: {
     useAsTitle: 'titleEn',
     defaultColumns: ['titleEn', 'category', 'status', 'isPinned', 'publishedAt', 'updatedAt'],
-    group: { zh: 'Editor', en: 'Editor' },
+    group: { zh: 'Editor', en: 'Editorial' },
     description: {
       zh: '选购指南：采用与全球资讯一致的三审流转，发布前必须补齐中英标题/摘要/正文并上传 cover 封面。',
       en: 'Buying guides use the same editorial workflow as News: compliance -> chief -> published, with bilingual completeness and cover required before publishing.'

@@ -43,6 +43,42 @@ type EnsureGuideDraftResult = {
   hasCover: boolean;
 };
 
+function toLexicalParagraph(text: string) {
+  return {
+    children: [
+      {
+        detail: 0,
+        format: 0,
+        mode: "normal",
+        style: "",
+        text,
+        type: "text",
+        version: 1,
+      },
+    ],
+    direction: null,
+    format: "",
+    indent: 0,
+    type: "paragraph",
+    version: 1,
+    textFormat: 0,
+    textStyle: "",
+  };
+}
+
+function toGuideContent(seed: GuideSeed) {
+  return {
+    root: {
+      children: [toLexicalParagraph(seed.contentZh), toLexicalParagraph(seed.contentEn)],
+      direction: null,
+      format: "",
+      indent: 0,
+      type: "root",
+      version: 1,
+    },
+  };
+}
+
 const GUIDE_CATEGORY_BOOTSTRAP = [
   "beginner",
   "scenario",
@@ -576,7 +612,7 @@ async function ensureGuideDraft(seed: GuideSeed, token: string): Promise<EnsureG
     titleEn: seed.titleEn,
     summaryZh: seed.summaryZh,
     summaryEn: seed.summaryEn,
-    content: seed.contentZh,
+    content: toGuideContent(seed),
     publishedAt: seed.publishedAt,
   };
 
@@ -596,18 +632,14 @@ async function ensureGuideDraft(seed: GuideSeed, token: string): Promise<EnsureG
 }
 
 async function patchEnglishLocale(id: string, seed: GuideSeed, token: string): Promise<void> {
-  await request(
-    `/api/guides/${id}`,
-    {
-      method: "PATCH",
-      body: JSON.stringify({
-        titleEn: seed.titleEn,
-        summaryEn: seed.summaryEn,
-        content: seed.contentEn,
-      }),
-    },
-    token
-  );
+  await request(`/api/guides/${id}`, {
+    method: "PATCH",
+    body: JSON.stringify({
+      titleEn: seed.titleEn,
+      summaryEn: seed.summaryEn,
+      content: toGuideContent(seed),
+    }),
+  }, token);
 }
 
 async function readCurrentGuideStatus(id: string, token: string): Promise<string> {

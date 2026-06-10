@@ -26,7 +26,7 @@ export const GuideCategories: CollectionConfig = {
   },
   admin: {
     useAsTitle: "key",
-    group: { en: "Editor", zh: "Editor" },
+    group: { en: "Editorial", zh: "Editor" },
     defaultColumns: ["key", "name", "isSystem", "isVisibleInTabs", "sortOrder", "updatedAt"],
     description: "用于选购指南前台筛选与后台归类；key 需与指南 category 字段一致。",
   },
