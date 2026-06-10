@@ -30,6 +30,8 @@
     "ops:preview:media-r2-keys:like": "./scripts/preview-media-r2-keys.sh --like",
     "ops:verify:media-r2-prefix": "./scripts/verify-media-r2-prefix.sh",
     "ops:db:migrate:remote": "./scripts/ops-db-migrate-remote.sh",
+    "seed:news-categories": "npx tsx scripts/seed-news-categories.ts",
+    "seed:news": "npx tsx scripts/seed-news.ts",
     "payload:types": "payload generate:types",
     "payload:importmap": "payload generate:importmap"
   },

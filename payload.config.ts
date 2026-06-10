@@ -17,6 +17,8 @@ import { Brands } from "./src/payload/collections/Brands";
 import { Categories } from "./src/payload/collections/Categories";
 import { Products } from "./src/payload/collections/Products";
 import { Reviews } from "./src/payload/collections/Reviews";
+import { News } from "./src/payload/collections/News";
+import { NewsCategories } from "./src/payload/collections/NewsCategories";
 import { SitePages } from "./src/payload/collections/SitePages";
 import { LocaleEntries } from "./src/payload/collections/LocaleEntries";
 
@@ -72,6 +74,8 @@ if (hasR2Storage) {
 const localOrigins = [
   "http://127.0.0.1:3000",
   "http://localhost:3000",
+  "http://127.0.0.1:5173",
+  "http://localhost:5173",
   "http://127.0.0.1:8081",
   "http://localhost:8081",
   "http://127.0.0.1:8083",
@@ -106,7 +110,10 @@ const configuredOrigins = [
 const allowedOrigins = Array.from(new Set([...localOrigins, ...configuredOrigins]));
 
 const dbAdapter = databaseURL.startsWith("file:")
-  ? sqliteAdapter({ client: { url: databaseURL } })
+  ? sqliteAdapter({
+      client: { url: databaseURL },
+      push: shouldAutoPushSchema,
+    })
   : postgresAdapter({
       pool: { connectionString: databaseURL },
       push: shouldAutoPushSchema,
@@ -165,7 +172,19 @@ export default buildConfig({
   editor: lexicalEditor({}),
   db: dbAdapter,
   plugins: storagePlugins,
-  collections: [Users, Members, Media, Brands, Categories, Products, Reviews, SitePages, LocaleEntries],
+  collections: [
+    Users,
+    Members,
+    Media,
+    Brands,
+    Categories,
+    Products,
+    Reviews,
+    NewsCategories,
+    News,
+    SitePages,
+    LocaleEntries
+  ],
   typescript: { outputFile: path.resolve(dirname, "payload-types.ts") },
   upload: { limits: { fileSize: 10 * 1024 * 1024 } }
 });
