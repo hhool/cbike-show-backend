@@ -25,7 +25,7 @@ export const Categories: CollectionConfig = {
         { label: "儿童滑板车（Scooter）", value: "scooter" },
         { label: "儿童自行车（Bicycle）", value: "bicycle" },
         { label: "儿童三轮车（Tricycle）", value: "tricycle" },
-        { label: "儿童电动车（Electric Bike）", value: "electric_bike" },
+        { label: "儿童电动车（Electric Car）", value: "electric_bike" },
         { label: "儿童滑行车（Ride-on Toy）", value: "ride_on_toy" },
         { label: "儿童电动玩具车（Kids Electric Ride-on Car）", value: "electric_toy_car" },
         { label: "儿童学步车（Walker）", value: "walker" },

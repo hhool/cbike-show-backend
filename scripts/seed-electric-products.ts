@@ -52,7 +52,7 @@ const CATEGORY_SEEDS: CategorySeed[] = [
     slug: "electric-bike",
     kind: "electric_bike",
     nameZh: "儿童电动车",
-    nameEn: "Kids Electric Bike",
+    nameEn: "Kids Electric Car",
     ageRange: "3–8y",
   },
 ];
