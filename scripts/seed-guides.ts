@@ -97,8 +97,8 @@ const GUIDE_SEEDS: GuideSeed[] = [
     titleEn: "How to choose your first stroller: a 6-step checklist",
     summaryZh: "适合 0–6 月新生儿家庭",
     summaryEn: "Designed for families with newborns aged 0-6 months.",
-    contentZh: "本指南详细讲解新生儿推车选购的6个关键步骤，帮助新手家长快速理解产品选择的核心逻辑...",
-    contentEn: "This guide walks you through 6 key steps for choosing a newborn stroller, helping first-time parents quickly understand the core logic behind product selection...",
+    contentZh: "第一次购买新生儿推车时，建议先把宝宝月龄、主要出行场景、居住楼层和车辆后备箱尺寸写下来，再去比较品牌。0-6 月宝宝需要稳定平躺、可靠刹车和完整遮阳，座舱支撑比花哨功能更重要。试车时重点看单手折叠是否顺畅、车架晃动是否明显、安全带是否贴合、轮组过门槛是否费力。最后把预算拆成安全刚需、舒适升级和可选配件三类，就能避免被营销词带偏。下单前再确认保修网点、配件价格和退换货周期，给后续使用留出余量，避免返工。",
+    contentEn: "When buying a newborn stroller for the first time, start by writing down the baby age, daily routes, home access, and car trunk size before comparing brands. For 0-6 months, flat recline, stable braking, supportive seating, and reliable canopy coverage matter more than decorative features. During a test push, check one-hand folding, frame wobble, harness fit, and how the wheels handle thresholds. Split the budget into safety essentials, comfort upgrades, and optional accessories so marketing claims do not drive the decision.",
     publishedAt: "2026-06-10T08:00:00.000Z"
   },
   {
@@ -108,8 +108,8 @@ const GUIDE_SEEDS: GuideSeed[] = [
     titleEn: "Outdoor-travel stroller buying framework",
     summaryZh: "重点关注减震 / 越野轮 / 防晒",
     summaryEn: "Prioritize suspension, all-terrain wheels, and sun protection.",
-    contentZh: "针对户外出行场景，本指南重点讲解如何评估推车的减震性能、轮胎通过性和防晒能力...",
-    contentEn: "For outdoor travel scenarios, this guide emphasizes how to assess stroller suspension, tire terrain-handling, and sun protection capabilities...",
+    contentZh: "户外出行推车不能只看轮子大不大，而要结合路面类型判断整车通过性。公园石板路、露营草地和乡村碎石路对悬挂、轮胎材质、座舱稳定性要求完全不同。选购时建议观察前轮是否容易卡顿、后轮是否有足够抓地力、车把高度是否适合长时间推行，遮阳篷是否能覆盖低角度阳光。还要确认收车后是否能放进车尾箱，雨罩、蚊帐和杯架等配件是否容易购买，避免户外场景真正使用时才发现短板。若经常长途自驾，还应关注轮组快拆、清洁难度和后备箱装载顺序。",
+    contentEn: "For outdoor travel, do not judge only by wheel size; match the stroller to the surfaces you actually use. Park tiles, campsite grass, and gravel paths demand different suspension, tire material, and cabin stability. When evaluating a model, watch whether the front wheels catch, whether the rear wheels keep traction, whether the handlebar suits long pushes, and whether the canopy blocks low-angle sun. Also confirm folded trunk fit and accessory availability such as rain covers, mosquito nets, and cup holders before relying on the stroller for trips.",
     publishedAt: "2026-06-09T09:00:00.000Z"
   },
   {
@@ -119,8 +119,8 @@ const GUIDE_SEEDS: GuideSeed[] = [
     titleEn: "Mid-range stroller plan for the ¥1000-3000 budget",
     summaryZh: "拆解溢价构成,识别智商税",
     summaryEn: "Break down premium pricing and avoid low-value markups.",
-    contentZh: "在 1000-3000 元预算内，什么配置是必须的，什么是溢价？本指南帮你识别价格构成...",
-    contentEn: "Within a ¥1000-3000 budget, what specs are essential and what adds unnecessary cost? This guide helps you understand the price composition...",
+    contentZh: "1000-3000 元价位最容易出现配置堆叠和真实体验不匹配的问题。建议先锁定刹车结构、安全带、座舱支撑、轮组耐用度这些基础项，再看避震、面料、收车方式和配件完整度。不要被单一卖点决定购买，例如只强调超轻却牺牲稳定性，或只强调高景观却忽略搬运重量。对比时把 3-5 款候选车型放在同一张表里，记录重量、折叠尺寸、保修、可替换配件和真实用户反馈，预算会更容易落在合理区间。促销期也要看清赠品是否刚需，避免因为短期优惠买到不适合日常路线的车型。",
+    contentEn: "The ¥1000-3000 range often mixes useful upgrades with features that do not improve daily use. Start with braking, harness quality, seat support, and wheel durability, then compare suspension, fabric, folding design, and included accessories. Avoid letting one headline claim decide the purchase, such as ultralight weight that reduces stability or high-view seating that makes lifting difficult. Put three to five candidate models into one table with weight, folded size, warranty, replaceable parts, and real user feedback so the budget lands in a practical range.",
     publishedAt: "2026-06-08T10:00:00.000Z"
   },
   {
@@ -130,8 +130,8 @@ const GUIDE_SEEDS: GuideSeed[] = [
     titleEn: "Seven common patterns of misleading specifications",
     summaryZh: "重量、载重、轮胎类型如何识别",
     summaryEn: "How to verify claimed weight, load limits, and tire type.",
-    contentZh: "产品参数虚标是消费者投诉最多的问题。本指南总结了 7 种常见套路及识别方法...",
-    contentEn: "False specification claims are among the most common consumer complaints. This guide summarizes 7 common patterns and how to identify them...",
+    contentZh: "参数虚标通常出现在重量、承重、轮胎材质、平躺角度和避震描述上。看到超轻、超大承重、越野级减震这类词时，要继续追问测试条件、是否含座垫和配件、承重是静态还是动态，以及角度是否有实测照片。线上详情页最好保存截图，与客服确认书面口径；线下试车则要观察车架受力后是否异响、折叠锁是否松动、刹车是否左右同步。把营销话术拆成可验证指标，才能降低踩坑概率。若同一型号在多个渠道参数不同，应优先参考说明书、检测报告和品牌官网。",
+    contentEn: "Misleading specs commonly appear in weight, load rating, tire material, recline angle, and suspension claims. When you see phrases like ultralight, extra-high capacity, or all-terrain suspension, ask about test conditions, whether cushions and accessories are included, whether load is static or dynamic, and whether recline angles have measurement photos. Save screenshots of online claims and confirm details with customer service in writing. In store, check frame noise under load, fold-lock looseness, and left-right brake synchronization. Turning marketing copy into verifiable indicators reduces purchase risk.",
     publishedAt: "2026-06-07T11:00:00.000Z"
   },
   {
@@ -141,8 +141,8 @@ const GUIDE_SEEDS: GuideSeed[] = [
     titleEn: "How to validate overseas certification authenticity",
     summaryZh: "EN1888 / ASTM 证书查询通道",
     summaryEn: "Use EN1888 and ASTM certificate lookup channels.",
-    contentZh: "跨境购物时，如何验证进口推车的认证信息？本指南提供各主要认证体系的查询方式...",
-    contentEn: "When shopping cross-border, how do you verify imported stroller certifications? This guide provides lookup methods for major certification systems...",
+    contentZh: "跨境购买推车时，认证信息不能只看商品页贴图。建议先确认销售地区对应的标准，例如欧盟 EN1888、美国 ASTM F833 与 CPSC 要求，再核对证书编号、测试机构、型号名称和生产批次是否一致。遇到只展示品牌大证书、不展示具体型号报告的页面，要向商家索要完整文件和售后条款。还需要提前确认国内维修渠道、配件购买方式、物流破损理赔和退换货成本。认证是真的，售后可执行，才适合跨境下单。若页面没有中文说明或召回查询入口，建议降低优先级，避免后续沟通成本过高。",
+    contentEn: "For cross-border stroller purchases, do not rely only on certificate images in a product listing. First match the market to the relevant standard, such as EN1888 in the EU or ASTM F833 and CPSC requirements in the US, then compare certificate number, test lab, model name, and production batch. If a seller shows only a brand-level certificate instead of the specific model report, request full documents and warranty terms. Also confirm local repair options, spare-part sourcing, shipping damage claims, and return cost. Certification plus executable after-sales support makes the order safer.",
     publishedAt: "2026-06-06T12:00:00.000Z"
   },
   {
@@ -152,8 +152,8 @@ const GUIDE_SEEDS: GuideSeed[] = [
     titleEn: "Balance bike vs tricycle: best fit for a 2-year-old",
     summaryZh: "发育阶段对应车型对照",
     summaryEn: "Model selection mapped to development stages.",
-    contentZh: "2 岁宝宝应该选择平衡车还是三轮车？本指南根据发育阶段为你分析各车型的优缺点...",
-    contentEn: "Should a 2-year-old get a balance bike or tricycle? This guide analyzes each model's pros and cons based on development stages...",
+    contentZh: "2 岁左右选择平衡车还是三轮车，关键看孩子的身高、跨高、核心力量和胆量。平衡车更强调身体协调和方向控制，适合能稳定行走、愿意主动滑行的孩子；三轮车支撑更强，适合刚开始练习蹬踏或需要家长辅助推行的阶段。试用时要看双脚能否自然踩地、把手是否过宽、座椅是否容易调节，以及摔倒时车身是否压腿。不要过早追求速度，先让孩子建立安全感和控制感，后续过渡会更顺。购买后前几次练习应选择平整场地，并准备头盔和护具建立安全习惯。",
+    contentEn: "Choosing between a balance bike and a tricycle around age two depends on height, inseam, core strength, and confidence. Balance bikes build coordination and steering control, fitting children who walk steadily and enjoy self-propelling. Tricycles offer more support and suit children learning to pedal or needing parent assistance. During a trial, check whether both feet reach the ground naturally, whether the handlebar is too wide, whether the seat adjusts easily, and whether the frame could trap legs during a fall. Prioritize control and confidence before speed.",
     publishedAt: "2026-06-05T13:00:00.000Z"
   },
   {
@@ -163,8 +163,8 @@ const GUIDE_SEEDS: GuideSeed[] = [
     titleEn: "Standard workflow for stroller cleaning and maintenance",
     summaryZh: "延长使用年限的 5 个习惯",
     summaryEn: "Five habits that extend product lifespan.",
-    contentZh: "正确的清洁和保养方法可以大大延长推车的使用寿命。本指南为你提供标准的维护流程...",
-    contentEn: "Proper cleaning and maintenance can significantly extend stroller lifespan. This guide provides a standard maintenance workflow...",
+    contentZh: "推车保养不需要复杂工具，但需要固定节奏。每周可用湿布清理车架、座舱和轮组泥沙，检查刹车踏板、安全带扣、折叠锁和螺丝是否松动；雨天或海边使用后要及时擦干金属件，避免轴承和铆钉位置生锈。布套清洗前先查看水洗标，避免高温烘干导致缩水变形。长期不用时建议收车后放在干燥通风处，不要重压车架。做好这些基础动作，推行顺畅度和二手残值都会更稳定。若出现异响或刹车回弹变慢，应暂停使用并联系售后排查，保留维修记录备查。",
+    contentEn: "Stroller maintenance does not need complicated tools, but it does need a steady routine. Weekly, wipe mud from the frame, seat, and wheels, then check the brake pedal, harness buckle, fold lock, and screws for looseness. After rain or seaside use, dry metal parts quickly to reduce rust around bearings and rivets. Read the fabric care label before washing covers, and avoid high-heat drying that can shrink or distort them. For long storage, fold the stroller in a dry ventilated place without heavy pressure on the frame. These basics preserve handling and resale value.",
     publishedAt: "2026-06-04T14:00:00.000Z"
   },
   {
@@ -174,8 +174,8 @@ const GUIDE_SEEDS: GuideSeed[] = [
     titleEn: "Newborn stroller safety checklist",
     summaryZh: "上路前 10 项必查，避免新手误区",
     summaryEn: "Ten must-check items before first use to avoid common beginner mistakes.",
-    contentZh: "本清单面向首次上路家庭，覆盖刹车、安全带、坐躺角度、遮阳与收车锁止等关键项目，帮助你在 5 分钟内完成安全确认...",
-    contentEn: "This checklist targets first-time families and covers brakes, harness, recline angle, canopy, and fold-lock readiness so you can complete a safety check in minutes...",
+    contentZh: "新生儿推车上路前，建议固定做一次 5 分钟安全检查。先确认车架完全展开并听到锁止声，再踩下刹车轻推车身，观察是否有滑动。安全带要贴合肩部和胯部，不能只扣腰带；座椅角度需接近平躺，头颈位置不要悬空。遮阳篷和透气窗要同时考虑，避免为了遮光造成闷热。最后检查随车包、挂钩和杯架是否让车身重心后移。把这些动作变成习惯，比临时相信说明书更可靠。出门路线如有坡道或台阶，应提前规划绕行或双人协助方式，减少临场风险。",
+    contentEn: "Before taking a newborn stroller out, run a five-minute safety check every time. Confirm the frame is fully opened and locked, then engage the brake and gently push to see whether the stroller moves. The harness should fit shoulders and hips, not only the waist. Recline should be close to flat, with the head and neck properly supported. Balance canopy coverage with ventilation so sun protection does not create overheating. Finally, check whether bags, hooks, or cup holders shift the center of gravity backward. Habitual checks are more reliable than assuming setup is correct.",
     publishedAt: "2026-06-03T08:00:00.000Z"
   },
   {
@@ -185,8 +185,8 @@ const GUIDE_SEEDS: GuideSeed[] = [
     titleEn: "City-commute stroller setup recommendations",
     summaryZh: "地铁、电梯、商场三场景实用配置",
     summaryEn: "Practical setup for metro, elevators, and shopping-mall routes.",
-    contentZh: "针对高频城市通勤场景，本指南提供轮径、折叠体积、提拿手位与储物容量的配置建议，帮助家庭在日常出行中兼顾效率与舒适...",
-    contentEn: "For high-frequency city commuting, this guide recommends wheel size, folded volume, carry points, and storage capacity to balance efficiency and comfort...",
+    contentZh: "城市通勤推车的核心不是功能越多越好，而是进出地铁、电梯、商场和小区门禁时是否顺手。建议优先选择折叠步骤少、站立收纳稳定、单手推行不跑偏的车型；车宽要能通过常见闸机和窄电梯，重量要匹配主要照护人的搬运能力。储物篮够用即可，过大反而容易塞满重物影响稳定。试车时模拟抱娃收车、过减速带、进后备箱三个动作，比单看参数更接近日常体验。若日常需要公交换乘，还要重点确认收车后的握持位置和肩背可行性，避免高峰期手忙脚乱。",
+    contentEn: "For city commuting, the best stroller is not the one with the most features, but the one that works smoothly through metro gates, elevators, malls, and residential access points. Prioritize fewer folding steps, stable self-standing storage, and straight one-hand pushing. Width should pass common gates and narrow elevators, while weight should match the caregiver who lifts it most often. A storage basket should be useful but not encourage heavy loading that reduces stability. Simulate folding while holding a child, crossing speed bumps, and loading the trunk before deciding.",
     publishedAt: "2026-06-02T09:00:00.000Z"
   },
   {
@@ -196,8 +196,8 @@ const GUIDE_SEEDS: GuideSeed[] = [
     titleEn: "Budget stroller cost breakdown template",
     summaryZh: "三层预算法，快速识别必要配置",
     summaryEn: "A three-tier budgeting method to identify essential configurations quickly.",
-    contentZh: "本模板将购车预算拆分为核心安全、舒适升级、可选配件三层，结合家庭使用周期与折旧预期，帮助你做出更稳妥的预算决策...",
-    contentEn: "This template splits stroller spending into core safety, comfort upgrades, and optional accessories while considering usage horizon and depreciation...",
+    contentZh: "预算型推车建议用三层法拆解成本。第一层是不能省的安全项，包括刹车、安全带、车架稳定和基础认证；第二层是影响每天体验的舒适项，例如遮阳、减震、座舱面料和推把高度；第三层才是杯架、脚套、收纳袋等可选配件。购买前估算使用周期、是否会生二胎、未来二手转卖概率，再决定是否加钱。这样能把预算花在高频价值上，而不是被套装赠品或短期折扣牵着走。预算表中还应加入雨罩、维修件和物流退换成本，避免低价变成隐性高价，决策更稳。",
+    contentEn: "Use a three-layer method for budget stroller spending. The first layer is non-negotiable safety: brakes, harness, frame stability, and basic certification. The second layer affects daily comfort: canopy, suspension, seat fabric, and handlebar height. The third layer is optional accessories such as cup holders, footmuffs, and storage bags. Before buying, estimate usage duration, whether a second child may use it, and resale probability. This keeps money on high-frequency value rather than bundled gifts or temporary discounts.",
     publishedAt: "2026-06-01T10:00:00.000Z"
   },
   {
@@ -207,8 +207,8 @@ const GUIDE_SEEDS: GuideSeed[] = [
     titleEn: "Second-hand stroller risk audit guide",
     summaryZh: "二手交易前的结构与召回核验流程",
     summaryEn: "A structural and recall-verification flow before second-hand purchases.",
-    contentZh: "面向二手交易场景，本指南提供车架裂纹、锁扣疲劳、召回批次与配件缺失的排查步骤，帮助你降低潜在安全风险...",
-    contentEn: "For second-hand transactions, this guide covers frame cracks, lock fatigue, recall batches, and missing parts to reduce hidden safety risk...",
+    contentZh: "二手推车最重要的是确认结构安全，而不是只看成色。看车时先查品牌和型号是否有召回记录，再检查车架焊点、铆钉、折叠锁、刹车齿和安全带扣是否磨损或变形。轮组如果明显偏磨，可能代表长期超载或路况使用强度高。要求卖家提供购买凭证、维修记录和原配件清单，缺少说明书时要能在线找到同型号资料。价格再低，也不建议购买事故车、改装车或无法确认批次的库存车。交易完成前最好现场演示展开、收车和刹停，确认关键动作稳定，再付款。",
+    contentEn: "For second-hand strollers, structural safety matters more than cosmetic condition. First check whether the brand and model have recall records, then inspect frame welds, rivets, fold locks, brake teeth, and harness buckles for wear or deformation. Uneven wheel wear may indicate overload or heavy rough-surface use. Ask the seller for proof of purchase, repair history, and an original accessory list; if the manual is missing, make sure the same model documentation is available online. Avoid crash-damaged, modified, or batch-unclear units even at a low price.",
     publishedAt: "2026-05-31T11:00:00.000Z"
   },
   {
@@ -218,8 +218,8 @@ const GUIDE_SEEDS: GuideSeed[] = [
     titleEn: "Cross-border after-sales and warranty claim guide",
     summaryZh: "发票、保修条款与物流理赔要点",
     summaryEn: "Key points for invoices, warranty terms, and logistics claims.",
-    contentZh: "本指南梳理跨境平台常见售后路径，包含保修条款解读、理赔材料准备与争议处理顺序，帮助你提升跨境维权成功率...",
-    contentEn: "This guide outlines common cross-border after-sales paths, including warranty terms, claim evidence preparation, and dispute handling sequence...",
+    contentZh: "跨境售后要在下单前就设计好证据链。购买时保存商品页、订单、付款凭证、物流单号和客服承诺截图；收货开箱建议全程录像，特别记录外箱破损、配件缺失和车架划痕。保修条款要看清是否覆盖中国大陆、是否需要寄回原销售地、运费由谁承担。出现问题时先找平台售后，再联系品牌客服，最后准备信用卡争议或物流理赔材料。流程越清楚，维权成本越可控。不要过早丢弃包装和标签，它们往往是物流破损理赔的重要证据，也能证明批次来源和责任。",
+    contentEn: "Cross-border after-sales support should be planned before checkout. Save the product page, order record, payment proof, tracking number, and customer-service promises. Record the unboxing, especially carton damage, missing accessories, and frame scratches. Read warranty terms carefully: whether mainland China is covered, whether the item must be shipped back to the original market, and who pays freight. If problems occur, contact platform support first, then the brand, and finally prepare credit-card dispute or logistics claim materials. Clear evidence keeps claim costs manageable.",
     publishedAt: "2026-05-30T12:00:00.000Z"
   },
   {
@@ -229,8 +229,8 @@ const GUIDE_SEEDS: GuideSeed[] = [
     titleEn: "Balance bike fitting guide by height",
     summaryZh: "从跨高到把位的尺寸匹配规则",
     summaryEn: "Sizing rules from inseam clearance to handlebar position.",
-    contentZh: "以儿童身高与跨高为主轴，本指南给出座高区间、把立调节和脚踏过渡建议，帮助家长选择更匹配的平衡车型号...",
-    contentEn: "Using child height and inseam as primary inputs, this guide provides seat-height ranges, stem adjustment tips, and transition suggestions...",
+    contentZh: "平衡车选型要从孩子真实身高和跨高出发，而不是只按年龄。合适的座高应让孩子坐上后双脚能自然踩地、膝盖微弯，太高会增加恐惧感，太低则影响滑行动作。车重最好不超过孩子体重的三分之一，便于自己扶起和转向。把手宽度、转向限位、轮胎材质也会影响控制感。第一次练习建议选择平整空旷场地，先练推行和刹停，再逐步增加滑行距离，不急着上坡或追求速度。试骑时观察孩子是否愿意主动抬脚滑行，这比年龄标签更能说明匹配度，家长也更放心。",
+    contentEn: "Balance bike fit should start with real height and inseam, not age alone. The right seat height lets the child sit with both feet flat and knees slightly bent; too high creates fear, while too low disrupts gliding. Bike weight should ideally stay under one third of the child's body weight so they can lift and steer it. Handlebar width, steering limiter, and tire material also affect control. For first practice, choose a flat open area, start with walking and stopping, then gradually extend gliding distance before hills or speed.",
     publishedAt: "2026-05-29T13:00:00.000Z"
   },
   {
@@ -240,11 +240,20 @@ const GUIDE_SEEDS: GuideSeed[] = [
     titleEn: "Rainy-season stroller maintenance and anti-rust tips",
     summaryZh: "雨后清洁、轴承养护与存放规范",
     summaryEn: "Post-rain cleaning, bearing care, and storage best practices.",
-    contentZh: "针对潮湿与多雨环境，本指南提供雨后快速清洁、关键金属件防锈和轮组养护步骤，帮助延长整车寿命并保持推行顺畅...",
-    contentEn: "For humid and rainy environments, this guide covers post-rain cleaning, anti-rust handling for key metal parts, and wheelset care steps...",
+    contentZh: "雨季使用推车后，最怕水分长期停留在轴承、铆钉、刹车齿和折叠关节处。回家后先用干布擦掉车架和轮组水迹，再把车放在通风处完全晾干，不要直接收进密闭储物间。轮胎缝隙里的泥沙要及时清理，避免干结后影响转向；布套若被雨水打湿，应按水洗标拆洗或阴干。发现刹车变涩、轮组异响或金属点锈，应尽快维护。小问题早处理，能避免后期更换大件。潮湿地区可在存放处放除湿袋，并定期打开遮阳篷检查霉味和布套状态，保持干爽卫生安全。",
+    contentEn: "After rainy-season use, the main risk is moisture staying around bearings, rivets, brake teeth, and folding joints. At home, wipe water from the frame and wheels, then leave the stroller in a ventilated area until fully dry instead of sealing it in storage. Remove mud from tire grooves before it hardens and affects steering. If fabric gets wet, follow the care label for washing or shade drying. When brakes feel stiff, wheels make noise, or metal spots show rust, service them early. Small maintenance prevents expensive part replacement later.",
     publishedAt: "2026-05-28T14:00:00.000Z"
   }
 ];
+
+function assertGuideSeedContentLength(seeds: GuideSeed[]): void {
+  const shortSeeds = seeds.filter((seed) => Array.from(seed.contentZh || "").length < 200);
+  if (shortSeeds.length > 0) {
+    throw new Error(
+      `[seed-guides] guide Chinese body must be at least 200 characters: ${shortSeeds.map((seed) => seed.slug).join(", ")}.`
+    );
+  }
+}
 
 function assertGuideSeedCategoryCoverage(seeds: GuideSeed[]): void {
   const categoryCounter = new Map<string, number>();
@@ -724,6 +733,7 @@ async function upsertGuide(seed: GuideSeed, token: string): Promise<void> {
 
 async function main() {
   assertGuideSeedCategoryCoverage(GUIDE_SEEDS);
+  assertGuideSeedContentLength(GUIDE_SEEDS);
   await resolveApiBase();
   const token = await ensureAdminToken();
 
