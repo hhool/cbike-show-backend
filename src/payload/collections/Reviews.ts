@@ -76,7 +76,7 @@ function isReviewStatus(value: unknown): value is ReviewStatus {
 
 export const Reviews: CollectionConfig = {
   slug: "reviews",
-  labels: { singular: { en: "Review", zh: "测评" }, plural: { en: "Reviews", zh: "测评" } },
+  labels: { singular: { en: "Review Center", zh: "测评中心" }, plural: { en: "Review Center", zh: "测评中心" } },
   admin: {
     useAsTitle: "title",
     group: { en: "Editorial", zh: "内容编辑" },
