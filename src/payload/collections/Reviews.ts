@@ -69,7 +69,7 @@ export const Reviews: CollectionConfig = {
     useAsTitle: "title",
     group: { en: "Editorial", zh: "内容编辑" },
     defaultColumns: ["title", "type", "status", "scoreOverall", "publishedAt"],
-    description: "评测标题、摘要、正文均按 zh / en locale 分开保存；编辑正文时请切换顶部语言分别填写。"
+    description: "评测分类、标题、摘要、正文均可维护；正文按 zh / en locale 分开填写。"
   },
   access: {
     read: () => true,
@@ -100,6 +100,16 @@ export const Reviews: CollectionConfig = {
         { label: "年度榜单（Annual Rankings）", value: "ranking" }
       ],
       admin: { position: "sidebar" }
+    },
+    {
+      name: "category",
+      type: "relationship",
+      relationTo: "review-categories",
+      label: { en: "Review Category", zh: "评测分类" },
+      admin: {
+        position: "sidebar",
+        description: "用于评测中心分类展示；建议与 type 对应，便于前台标签一致。"
+      }
     },
     { name: "products", type: "relationship", relationTo: "products", hasMany: true, required: true, label: { en: "Related Products", zh: "关联产品" } },
     { name: "cover", type: "upload", relationTo: "media", label: { en: "Cover Image", zh: "封面图" } },
