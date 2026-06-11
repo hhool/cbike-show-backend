@@ -172,14 +172,14 @@ function toGuideContent(seed: GuideSeed, mediaId: number | null = null) {
   const [introEn, actionEn] = splitGuideText(seed.contentEn);
   const mediaNode = toLexicalUpload(mediaId, seed);
   const children = [
-    toLexicalHeading("中文要点", "h2"),
+    toLexicalHeading("中文正文", "h2"),
     toLexicalParagraph(introZh),
     toLexicalParagraph(actionZh || seed.summaryZh),
     toLexicalParagraphWithLink("延伸阅读：可返回 ", "选购指南列表", "guide.html", " 对照同分类文章与推荐产品。"),
     toLexicalList(["先确认真实使用场景", "再核对安全与售后", "最后用参数和预算表做复核"]),
     toLexicalQuote("编辑提示：正文内容可在后台 Lexical 编辑器继续插入图片、链接和补充段落。"),
     mediaNode,
-    toLexicalHeading("English Notes", "h2"),
+    toLexicalHeading("English Body", "h2"),
     toLexicalParagraph(introEn),
     toLexicalParagraph(actionEn || seed.summaryEn),
     toLexicalParagraphWithLink("Related reading: return to the ", "Buying Guide list", "guide.html?lang=en", " to compare articles in the same category."),

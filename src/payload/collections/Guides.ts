@@ -56,6 +56,25 @@ function extractRichTextPlainText(value: unknown): string {
   return walk(value).replace(/\s+/g, ' ').trim();
 }
 
+function richTextHasHeading(value: unknown, expectedTexts: string[]): boolean {
+  const expected = expectedTexts.map((item) => item.trim().toLowerCase());
+
+  const walk = (node: any): boolean => {
+    if (!node) return false;
+    if (Array.isArray(node)) return node.some(walk);
+    if (typeof node !== 'object') return false;
+
+    if (node.type === 'heading') {
+      const text = extractRichTextPlainText(node).trim().toLowerCase();
+      if (expected.includes(text)) return true;
+    }
+
+    return walk(node.root) || walk(node.children) || walk(node.content);
+  };
+
+  return walk(value);
+}
+
 function getGuidePublishMissingFields(snapshot: GuidePublishSnapshot): string[] {
   const missing: string[] = [];
 
@@ -65,6 +84,8 @@ function getGuidePublishMissingFields(snapshot: GuidePublishSnapshot): string[] 
   if (!snapshot.summaryZh.trim()) missing.push('中文摘要 summaryZh');
   if (!snapshot.summaryEn.trim()) missing.push('英文摘要 summaryEn');
   if (!extractRichTextPlainText(snapshot.content)) missing.push('正文内容 content');
+  if (!richTextHasHeading(snapshot.content, ['中文正文', '中文要点', 'chinese body', 'chinese notes'])) missing.push('中文正文分区 content: 中文正文');
+  if (!richTextHasHeading(snapshot.content, ['english body', 'english notes'])) missing.push('英文正文分区 content: English Body');
 
   return missing;
 }
@@ -363,7 +384,13 @@ export const Guides: CollectionConfig = {
     {
       name: 'content',
       type: 'richText',
-      label: { zh: '正文内容', en: 'Content' },
+      label: { zh: '正文内容（中文正文 / English Body 分区填写）', en: 'Content (Chinese Body / English Body sections)' },
+      admin: {
+        description: {
+          zh: '请在同一个富文本里使用两个二级标题分区：先写“中文正文”，再写“English Body”。前台会按当前语言只展示对应分区。不要把中英文混在同一分区。',
+          en: 'Use two h2 sections in the same rich text field: “中文正文” first, then “English Body”. The frontend renders only the matching section for the current locale.'
+        }
+      }
     },
     {
       name: 'status',
