@@ -1,14 +1,12 @@
 /**
  * seed-electric-products.ts
  *
- * Seeds an "电动车 / Electric Bike" category, a small set of fallback
- * kids-electric-vehicle brands, and a variety of children's electric vehicle
- * products bound to the `electric_bike` kind so the front-end category filter
- * has live data.
+ * Seeds an "电动车 / Electric Bike" category and a variety of children's
+ * electric vehicle products bound to the `electric_bike` kind so the front-end
+ * category filter has live data.
  *
  * Product brands are assigned from the existing production brand pool by stable
- * pseudo-random matching. Newly seeded fallback brands are only used if the
- * existing pool is too small.
+ * pseudo-random matching.
  *
  * Idempotent: categories / brands / products are upserted by slug.
  *
@@ -31,17 +29,6 @@ type CategorySeed = {
   nameZh: string;
   nameEn: string;
   ageRange: string;
-};
-
-type BrandSeed = {
-  slug: string;
-  name: string;
-  region: string;
-  country: string;
-  marketFocus: string[];
-  priorityScore: number;
-  introZh: string;
-  introEn: string;
 };
 
 type ProductSeed = {
@@ -70,38 +57,7 @@ const CATEGORY_SEEDS: CategorySeed[] = [
   },
 ];
 
-const BRAND_SEEDS: BrandSeed[] = [
-  {
-    slug: "razor-us",
-    name: "Razor",
-    region: "north_america",
-    country: "US",
-    marketFocus: ["electric_bike", "scooter"],
-    priorityScore: 78,
-    introZh: "美国电动滑板车与电动平衡车品牌，主打入门级儿童电动出行产品。",
-    introEn: "US brand for electric scooters and balance vehicles, focused on entry-level kids electric mobility.",
-  },
-  {
-    slug: "segway-ninebot-cn",
-    name: "Segway-Ninebot",
-    region: "apac",
-    country: "CN",
-    marketFocus: ["electric_bike", "balance_bike"],
-    priorityScore: 82,
-    introZh: "智能电动平衡与卡丁产品品牌,产品线覆盖儿童电动卡丁车与平衡车。",
-    introEn: "Smart electric balance and go-kart brand, with a product line covering kids electric karts and balance vehicles.",
-  },
-  {
-    slug: "rastar-cn",
-    name: "Rastar",
-    region: "apac",
-    country: "CN",
-    marketFocus: ["electric_bike", "electric_toy_car"],
-    priorityScore: 70,
-    introZh: "授权品牌儿童电动乘骑车制造商,产品包含电动摩托与电动乘骑跑车。",
-    introEn: "Licensed kids ride-on manufacturer, with electric motorcycles and ride-on sports cars.",
-  },
-];
+const EXCLUDED_SAMPLE_BRAND_SLUGS = new Set(["razor-us", "segway-ninebot-cn", "rastar-cn"]);
 
 const PRODUCT_SEEDS: ProductSeed[] = [
   {
@@ -421,29 +377,6 @@ async function upsertCategory(seed: CategorySeed, token: string): Promise<number
   return id;
 }
 
-async function upsertBrand(seed: BrandSeed, token: string): Promise<number> {
-  const existing = await findBySlug("brands", seed.slug, token);
-  const zhBody = {
-    slug: seed.slug,
-    name: seed.name,
-    region: seed.region,
-    country: seed.country,
-    marketFocus: seed.marketFocus,
-    priorityScore: seed.priorityScore,
-    intro: seed.introZh,
-  };
-  let id: number;
-  if (existing?.id) {
-    await request(`/api/brands/${existing.id}?locale=zh`, { method: "PATCH", body: JSON.stringify(zhBody) }, token);
-    id = Number(existing.id);
-  } else {
-    const created = unwrapDoc(await request("/api/brands?locale=zh", { method: "POST", body: JSON.stringify(zhBody) }, token));
-    id = Number(created?.id);
-  }
-  await request(`/api/brands/${id}?locale=en`, { method: "PATCH", body: JSON.stringify({ intro: seed.introEn }) }, token);
-  return id;
-}
-
 async function fetchAllBrands(token: string): Promise<BrandDoc[]> {
   const docs: BrandDoc[] = [];
   let page = 1;
@@ -469,9 +402,8 @@ function stableHash(value: string): number {
 }
 
 function buildAssignableBrands(allBrands: BrandDoc[]): BrandDoc[] {
-  const fallbackSeedSlugs = new Set(BRAND_SEEDS.map((seed) => seed.slug));
-  const existingBrands = allBrands.filter((brand) => !fallbackSeedSlugs.has(String(brand.slug || "")));
-  const pool = existingBrands.length >= 6 ? existingBrands : allBrands;
+  const pool = allBrands.filter((brand) => !EXCLUDED_SAMPLE_BRAND_SLUGS.has(String(brand.slug || "")));
+  if (!pool.length) throw new Error("No existing production brands are available for assignment.");
   return [...pool].sort((a, b) => String(a.slug || a.name).localeCompare(String(b.slug || b.name)));
 }
 
@@ -517,13 +449,6 @@ async function main() {
     const id = await upsertCategory(seed, token);
     categoryIdBySlug.set(seed.slug, id);
     console.log(`Upserted category: ${seed.slug} (${seed.kind}) -> ${id}`);
-  }
-
-  const brandIdBySlug = new Map<string, number>();
-  for (const seed of BRAND_SEEDS) {
-    const id = await upsertBrand(seed, token);
-    brandIdBySlug.set(seed.slug, id);
-    console.log(`Upserted brand: ${seed.slug} -> ${id}`);
   }
 
   const allBrands = await fetchAllBrands(token);
