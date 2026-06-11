@@ -440,11 +440,51 @@ const DDL_STATEMENTS = [
   `CREATE INDEX IF NOT EXISTS "news_regions_parent_id_idx" ON "news_regions" ("parent_id")`,
   `CREATE INDEX IF NOT EXISTS "news_regions_order_idx" ON "news_regions" ("order")`,
 
+  // ── review_categories ─────────────────────────────────────────────────────────
+  `CREATE TABLE IF NOT EXISTS "review_categories" (
+    "id"                 serial PRIMARY KEY NOT NULL,
+    "key"                varchar NOT NULL,
+    "sort_order"         numeric DEFAULT 100,
+    "is_visible_in_tabs" boolean DEFAULT true,
+    "is_system"          boolean DEFAULT false,
+    "updated_at"         timestamp with time zone NOT NULL DEFAULT now(),
+    "created_at"         timestamp with time zone NOT NULL DEFAULT now()
+  )`,
+  `CREATE UNIQUE INDEX IF NOT EXISTS "review_categories_key_idx" ON "review_categories" ("key")`,
+  `CREATE INDEX IF NOT EXISTS "review_categories_created_at_idx" ON "review_categories" ("created_at")`,
+
+  `CREATE TABLE IF NOT EXISTS "review_categories_locales" (
+    "id"          serial PRIMARY KEY NOT NULL,
+    "_parent_id"  integer NOT NULL REFERENCES "review_categories"("id") ON DELETE CASCADE,
+    "_locale"     varchar(10) NOT NULL,
+    "name"        text,
+    "description" text,
+    CONSTRAINT "review_categories_locales_parent_id_locale_unique" UNIQUE("_parent_id", "_locale")
+  )`,
+  `CREATE INDEX IF NOT EXISTS "review_categories_locales_parent_id_idx" ON "review_categories_locales" ("_parent_id")`,
+
+  // reviews.category_id (relationship to review_categories) — required by new schema
+  `ALTER TABLE "reviews" ADD COLUMN IF NOT EXISTS "category_id" integer`,
+  `DO $$
+   BEGIN
+     IF NOT EXISTS (
+       SELECT 1 FROM pg_constraint WHERE conname = 'reviews_category_id_review_categories_id_fk'
+     ) THEN
+       ALTER TABLE "reviews"
+         ADD CONSTRAINT "reviews_category_id_review_categories_id_fk"
+         FOREIGN KEY ("category_id") REFERENCES "review_categories"("id") ON DELETE SET NULL;
+     END IF;
+   END
+   $$`,
+  `CREATE INDEX IF NOT EXISTS "reviews_category_id_idx" ON "reviews" ("category_id")`,
+
   // Register new collections in payload_locked_documents_rels
   `ALTER TABLE "payload_locked_documents_rels"
    ADD COLUMN IF NOT EXISTS "news_id" integer REFERENCES "news"("id") ON DELETE CASCADE`,
   `ALTER TABLE "payload_locked_documents_rels"
    ADD COLUMN IF NOT EXISTS "news_categories_id" integer REFERENCES "news_categories"("id") ON DELETE CASCADE`,
+  `ALTER TABLE "payload_locked_documents_rels"
+   ADD COLUMN IF NOT EXISTS "review_categories_id" integer REFERENCES "review_categories"("id") ON DELETE CASCADE`,
 
   // Reset stale admin list/filter preferences that can keep specific collection pages blank
   // even when collection APIs are healthy (safe to rerun in production).
