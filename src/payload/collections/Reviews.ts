@@ -56,6 +56,18 @@ function mergeLocaleDraft(base: Partial<LocalizedSnapshot> | null, data: any): L
   };
 }
 
+function extractRelationID(value: unknown): string {
+  if (value == null) return "";
+  if (typeof value === "number") return String(value);
+  if (typeof value === "string") return value.trim();
+  if (typeof value === "object") {
+    const id = (value as { id?: unknown }).id;
+    if (typeof id === "number") return String(id);
+    if (typeof id === "string") return id.trim();
+  }
+  return "";
+}
+
 type ReviewStatus = "draft" | "compliance" | "chief" | "published" | "archived";
 
 function isReviewStatus(value: unknown): value is ReviewStatus {
@@ -64,12 +76,12 @@ function isReviewStatus(value: unknown): value is ReviewStatus {
 
 export const Reviews: CollectionConfig = {
   slug: "reviews",
-  labels: { singular: { en: "Review", zh: "评测" }, plural: { en: "Reviews", zh: "评测" } },
+  labels: { singular: { en: "Review", zh: "测评" }, plural: { en: "Reviews", zh: "测评" } },
   admin: {
     useAsTitle: "title",
     group: { en: "Editorial", zh: "内容编辑" },
     defaultColumns: ["title", "type", "status", "scoreOverall", "publishedAt"],
-    description: "评测标题、摘要、正文均按 zh / en locale 分开保存；编辑正文时请切换顶部语言分别填写。"
+    description: "测评标题、摘要、正文均按 zh / en locale 分开保存；编辑正文时请切换顶部语言分别填写。"
   },
   access: {
     read: () => true,
@@ -87,22 +99,23 @@ export const Reviews: CollectionConfig = {
     { name: "slug", type: "text", required: true, unique: true, index: true },
     {
       name: "type",
-      type: "select",
+      type: "text",
       required: true,
       defaultValue: "single",
-      label: { en: "Review Category", zh: "评测分类" },
-      options: [
-        { label: "单品实测（Single Review）", value: "single" },
-        { label: "多品横评（Comparison Review）", value: "compare" },
-        { label: "新品首发（New Arrival Review）", value: "newbie" },
-        { label: "跨境专项（Cross-border Special）", value: "cross_border" },
-        { label: "性价比（Best Value）", value: "value" },
-        { label: "实测甄别（Hands-on Verification）", value: "debunk" },
-        { label: "年度榜单（Annual Rankings）", value: "ranking" }
-      ],
+      label: { en: "Review Type Key", zh: "测评分类键" },
       admin: {
         position: "sidebar",
-        description: "评测中心分类键：single/compare/newbie/cross_border/value/debunk/ranking。"
+        description: "兼容筛选键，建议与测评分类 key 一致，如 ranking/newbie/single。"
+      }
+    },
+    {
+      name: "category",
+      type: "relationship",
+      relationTo: "review-categories",
+      label: { en: "Review Category", zh: "测评分类" },
+      admin: {
+        position: "sidebar",
+        description: "用于测评中心分类展示；支持后台新增/编辑/删除/排序。"
       }
     },
     { name: "products", type: "relationship", relationTo: "products", hasMany: true, required: true, label: { en: "Related Products", zh: "关联产品" } },
@@ -164,6 +177,42 @@ export const Reviews: CollectionConfig = {
         }
 
         const docId = String(originalDoc?.id ?? nextData?.id ?? "").trim();
+
+        const categoryID = extractRelationID(nextData?.category ?? originalDoc?.category);
+        if (categoryID) {
+          try {
+            const categoryDoc = await req.payload.findByID({
+              collection: "review-categories",
+              id: categoryID,
+              depth: 0,
+              locale: "zh",
+              fallbackLocale: false,
+            });
+            const key = String(categoryDoc?.key ?? "").trim();
+            if (key) nextData.type = key;
+          } catch {
+            // keep existing type when category lookup fails
+          }
+        } else {
+          const typeKey = String(nextData?.type ?? originalDoc?.type ?? "").trim().toLowerCase();
+          if (typeKey) {
+            try {
+              const categoryPayload = await req.payload.find({
+                collection: "review-categories",
+                locale: "zh",
+                fallbackLocale: false,
+                depth: 0,
+                limit: 1,
+                where: { key: { equals: typeKey } },
+              });
+              const matched = Array.isArray(categoryPayload?.docs) ? categoryPayload.docs[0] : null;
+              if (matched?.id) nextData.category = matched.id;
+            } catch {
+              // keep type-only compatibility when category is not configured
+            }
+          }
+        }
+
         const isCreate = operation === "create";
         const nextStatus = isReviewStatus(nextData?.status)
           ? nextData.status

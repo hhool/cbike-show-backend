@@ -17,6 +17,7 @@ import { Brands } from "./src/payload/collections/Brands";
 import { Categories } from "./src/payload/collections/Categories";
 import { Products } from "./src/payload/collections/Products";
 import { Reviews } from "./src/payload/collections/Reviews";
+import { ReviewCategories } from "./src/payload/collections/ReviewCategories";
 import { News } from "./src/payload/collections/News";
 import { NewsCategories } from "./src/payload/collections/NewsCategories";
 import { GuideCategories } from "./src/payload/collections/GuideCategories";
@@ -181,6 +182,7 @@ export default buildConfig({
     Brands,
     Categories,
     Products,
+    ReviewCategories,
     Reviews,
     NewsCategories,
     News,
