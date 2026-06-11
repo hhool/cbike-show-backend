@@ -24,13 +24,6 @@ function extractRichTextPlainText(value: unknown): string {
   return walk(value).replace(/\s+/g, " ").trim();
 }
 
-function isLocaleContentComplete(snapshot: LocalizedSnapshot): boolean {
-  const title = String(snapshot.title ?? "").trim();
-  const summary = String(snapshot.summary ?? "").trim();
-  const body = extractRichTextPlainText(snapshot.body);
-  return Boolean(title && summary && body);
-}
-
 function getMissingFields(snapshot: LocalizedSnapshot): Array<"title" | "summary" | "body"> {
   const missing: Array<"title" | "summary" | "body"> = [];
   if (!String(snapshot.title ?? "").trim()) missing.push("title");
@@ -76,7 +69,7 @@ export const Reviews: CollectionConfig = {
     useAsTitle: "title",
     group: { en: "Editorial", zh: "内容编辑" },
     defaultColumns: ["title", "type", "status", "scoreOverall", "publishedAt"],
-    description: "评测内容建议按当前 locale 单独填写，不要把中文和英文混写在同一个字段里。"
+    description: "评测正文使用“中文正文 / English Body”两个独立字段填写，避免中英文混写。"
   },
   access: {
     read: () => true,
@@ -118,11 +111,23 @@ export const Reviews: CollectionConfig = {
       admin: { description: "建议 1 段精简摘要，zh / en 分别维护。" }
     },
     {
+      name: "bodyZh",
+      type: "richText",
+      label: { en: "Chinese Body", zh: "中文正文" },
+      admin: { description: "中文正文内容。前台中文测评详情优先读取此字段。" }
+    },
+    {
+      name: "bodyEn",
+      type: "richText",
+      label: { en: "English Body", zh: "英文正文" },
+      admin: { description: "English body content. The English review detail page prefers this field." }
+    },
+    {
       name: "body",
       type: "richText",
       localized: true,
-      label: { en: "Review Body", zh: "正文" },
-      admin: { description: "正文按当前语言单独填写，建议分成 3 段，方便前台切分展示。" }
+      label: { en: "Legacy Localized Body", zh: "旧版多语言正文" },
+      admin: { hidden: true, description: "兼容历史 localized 正文数据；新内容请填写中文正文 bodyZh 与英文正文 bodyEn。" }
     },
     {
       name: "scores",
@@ -208,11 +213,18 @@ export const Reviews: CollectionConfig = {
             }
           }
 
-          if (activeLocale === locale) {
-            localeSnapshots[locale] = mergeLocaleDraft(dbDoc, nextData);
-          } else {
-            localeSnapshots[locale] = mergeLocaleDraft(dbDoc, {});
-          }
+          const baseSnapshot = activeLocale === locale
+            ? mergeLocaleDraft(dbDoc, nextData)
+            : mergeLocaleDraft(dbDoc, {});
+
+          const explicitBody = locale === "zh"
+            ? (nextData?.bodyZh ?? dbDoc?.bodyZh)
+            : (nextData?.bodyEn ?? dbDoc?.bodyEn);
+
+          localeSnapshots[locale] = {
+            ...baseSnapshot,
+            body: explicitBody ?? baseSnapshot.body,
+          };
         }
 
         if (nextStatus !== "published") return nextData;
