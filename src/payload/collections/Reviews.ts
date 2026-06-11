@@ -69,7 +69,7 @@ export const Reviews: CollectionConfig = {
     useAsTitle: "title",
     group: { en: "Editorial", zh: "内容编辑" },
     defaultColumns: ["title", "type", "status", "scoreOverall", "publishedAt"],
-    description: "评测正文使用“中文正文 / English Body”两个独立字段填写，避免中英文混写。"
+    description: "评测标题、摘要、正文均按 zh / en locale 分开保存；编辑正文时请切换顶部语言分别填写。"
   },
   access: {
     read: () => true,
@@ -111,23 +111,11 @@ export const Reviews: CollectionConfig = {
       admin: { description: "建议 1 段精简摘要，zh / en 分别维护。" }
     },
     {
-      name: "bodyZh",
-      type: "richText",
-      label: { en: "Chinese Body", zh: "中文正文" },
-      admin: { description: "中文正文内容。前台中文测评详情优先读取此字段。" }
-    },
-    {
-      name: "bodyEn",
-      type: "richText",
-      label: { en: "English Body", zh: "英文正文" },
-      admin: { description: "English body content. The English review detail page prefers this field." }
-    },
-    {
       name: "body",
       type: "richText",
       localized: true,
-      label: { en: "Legacy Localized Body", zh: "旧版多语言正文" },
-      admin: { hidden: true, description: "兼容历史 localized 正文数据；新内容请填写中文正文 bodyZh 与英文正文 bodyEn。" }
+      label: { en: "Review Body (English / Chinese separated by locale)", zh: "正文内容（中文 / 英文按语言分开填写）" },
+      admin: { description: "请在后台顶部切换 zh / en locale，分别填写中文正文和英文正文；不要把中英文混写在同一个语言正文里。" }
     },
     {
       name: "scores",
@@ -213,18 +201,11 @@ export const Reviews: CollectionConfig = {
             }
           }
 
-          const baseSnapshot = activeLocale === locale
-            ? mergeLocaleDraft(dbDoc, nextData)
-            : mergeLocaleDraft(dbDoc, {});
-
-          const explicitBody = locale === "zh"
-            ? (nextData?.bodyZh ?? dbDoc?.bodyZh)
-            : (nextData?.bodyEn ?? dbDoc?.bodyEn);
-
-          localeSnapshots[locale] = {
-            ...baseSnapshot,
-            body: explicitBody ?? baseSnapshot.body,
-          };
+          if (activeLocale === locale) {
+            localeSnapshots[locale] = mergeLocaleDraft(dbDoc, nextData);
+          } else {
+            localeSnapshots[locale] = mergeLocaleDraft(dbDoc, {});
+          }
         }
 
         if (nextStatus !== "published") return nextData;

@@ -188,8 +188,6 @@ const DDL_STATEMENTS = [
   // _status columns – add if missing (ALTER TABLE ... ADD COLUMN IF NOT EXISTS)
   `ALTER TABLE "products" ADD COLUMN IF NOT EXISTS "_status" varchar(20) DEFAULT 'draft'`,
   `ALTER TABLE "reviews" ADD COLUMN IF NOT EXISTS "_status" varchar(20) DEFAULT 'draft'`,
-  `ALTER TABLE "reviews" ADD COLUMN IF NOT EXISTS "body_zh" jsonb`,
-  `ALTER TABLE "reviews" ADD COLUMN IF NOT EXISTS "body_en" jsonb`,
   `ALTER TABLE "site_pages" ADD COLUMN IF NOT EXISTS "_status" varchar(20) DEFAULT 'draft'`,
 
   // Backfill _status for existing rows; DEFAULT only affects new rows.
