@@ -43,19 +43,21 @@ type EnsureGuideDraftResult = {
   hasCover: boolean;
 };
 
+function toLexicalText(text: string, format = 0) {
+  return {
+    detail: 0,
+    format,
+    mode: "normal",
+    style: "",
+    text,
+    type: "text",
+    version: 1,
+  };
+}
+
 function toLexicalParagraph(text: string) {
   return {
-    children: [
-      {
-        detail: 0,
-        format: 0,
-        mode: "normal",
-        style: "",
-        text,
-        type: "text",
-        version: 1,
-      },
-    ],
+    children: [toLexicalText(text)],
     direction: null,
     format: "",
     indent: 0,
@@ -66,10 +68,126 @@ function toLexicalParagraph(text: string) {
   };
 }
 
-function toGuideContent(seed: GuideSeed) {
+function toLexicalHeading(text: string, tag = "h2") {
+  return {
+    children: [toLexicalText(text)],
+    direction: null,
+    format: "",
+    indent: 0,
+    tag,
+    type: "heading",
+    version: 1,
+  };
+}
+
+function toLexicalLink(label: string, url: string) {
+  return {
+    children: [toLexicalText(label, 1)],
+    direction: null,
+    fields: {
+      linkType: "custom",
+      newTab: false,
+      url,
+    },
+    format: "",
+    indent: 0,
+    type: "link",
+    version: 3,
+  };
+}
+
+function toLexicalParagraphWithLink(prefix: string, label: string, url: string, suffix: string) {
+  return {
+    children: [toLexicalText(prefix), toLexicalLink(label, url), toLexicalText(suffix)],
+    direction: null,
+    format: "",
+    indent: 0,
+    type: "paragraph",
+    version: 1,
+    textFormat: 0,
+    textStyle: "",
+  };
+}
+
+function toLexicalQuote(text: string) {
+  return {
+    children: [toLexicalParagraph(text)],
+    direction: null,
+    format: "",
+    indent: 0,
+    type: "quote",
+    version: 1,
+  };
+}
+
+function toLexicalList(items: string[], listType = "bullet") {
+  return {
+    children: items.map((item, index) => ({
+      checked: undefined,
+      children: [toLexicalText(item)],
+      direction: null,
+      format: "",
+      indent: 0,
+      type: "listitem",
+      value: index + 1,
+      version: 1,
+    })),
+    direction: null,
+    format: "",
+    indent: 0,
+    listType,
+    start: 1,
+    tag: listType === "number" ? "ol" : "ul",
+    type: "list",
+    version: 1,
+  };
+}
+
+function toLexicalUpload(mediaId: number | null, seed: GuideSeed) {
+  if (!mediaId) return null;
+  return {
+    fields: {
+      caption: `${seed.titleZh} / ${seed.titleEn}`,
+    },
+    format: "",
+    relationTo: "media",
+    type: "upload",
+    value: mediaId,
+    version: 3,
+  };
+}
+
+function splitGuideText(text: string): [string, string] {
+  const sentences = String(text || "")
+    .split(/(?<=[。！？.!?])\s*/)
+    .map((item) => item.trim())
+    .filter(Boolean);
+  if (sentences.length < 2) return [text, ""];
+  const pivot = Math.max(1, Math.ceil(sentences.length / 2));
+  return [sentences.slice(0, pivot).join(""), sentences.slice(pivot).join("")];
+}
+
+function toGuideContent(seed: GuideSeed, mediaId: number | null = null) {
+  const [introZh, actionZh] = splitGuideText(seed.contentZh);
+  const [introEn, actionEn] = splitGuideText(seed.contentEn);
+  const mediaNode = toLexicalUpload(mediaId, seed);
+  const children = [
+    toLexicalHeading("中文要点", "h2"),
+    toLexicalParagraph(introZh),
+    toLexicalParagraph(actionZh || seed.summaryZh),
+    toLexicalParagraphWithLink("延伸阅读：可返回 ", "选购指南列表", "guide.html", " 对照同分类文章与推荐产品。"),
+    toLexicalList(["先确认真实使用场景", "再核对安全与售后", "最后用参数和预算表做复核"]),
+    toLexicalQuote("编辑提示：正文内容可在后台 Lexical 编辑器继续插入图片、链接和补充段落。"),
+    mediaNode,
+    toLexicalHeading("English Notes", "h2"),
+    toLexicalParagraph(introEn),
+    toLexicalParagraph(actionEn || seed.summaryEn),
+    toLexicalParagraphWithLink("Related reading: return to the ", "Buying Guide list", "guide.html?lang=en", " to compare articles in the same category."),
+  ].filter(Boolean);
+
   return {
     root: {
-      children: [toLexicalParagraph(seed.contentZh), toLexicalParagraph(seed.contentEn)],
+      children,
       direction: null,
       format: "",
       indent: 0,
@@ -621,7 +739,7 @@ async function ensureGuideDraft(seed: GuideSeed, token: string): Promise<EnsureG
     titleEn: seed.titleEn,
     summaryZh: seed.summaryZh,
     summaryEn: seed.summaryEn,
-    content: toGuideContent(seed),
+    content: toGuideContent(seed, coverId),
     publishedAt: seed.publishedAt,
   };
 
@@ -640,13 +758,13 @@ async function ensureGuideDraft(seed: GuideSeed, token: string): Promise<EnsureG
   return { id, hasCover };
 }
 
-async function patchEnglishLocale(id: string, seed: GuideSeed, token: string): Promise<void> {
+async function patchEnglishLocale(id: string, seed: GuideSeed, token: string, coverId: number | null): Promise<void> {
   await request(`/api/guides/${id}`, {
     method: "PATCH",
     body: JSON.stringify({
       titleEn: seed.titleEn,
       summaryEn: seed.summaryEn,
-      content: toGuideContent(seed),
+      content: toGuideContent(seed, coverId),
     }),
   }, token);
 }
@@ -721,7 +839,8 @@ async function transitionGuideToPublished(id: string, publishedAt: string, token
 
 async function upsertGuide(seed: GuideSeed, token: string): Promise<void> {
   const { id, hasCover } = await ensureGuideDraft(seed, token);
-  await patchEnglishLocale(id, seed, token);
+  const coverId = await ensureGuideCoverMedia(seed, token);
+  await patchEnglishLocale(id, seed, token, coverId);
 
   if (!hasCover) {
     console.log(`Upserted guide as draft for local preview (missing cover): ${seed.slug}`);
